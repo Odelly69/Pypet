@@ -19,7 +19,7 @@ import java.util.List;
 
 /** Main Pypet screen with conservative sensory-safety presentation defaults. */
 public class MainActivity extends Activity {
-    TextView status, rewardStatus, petView;
+    TextView status, rewardStatus, petView, taskStatus;
     EditText editor;
     Python py;
     RewardAdManager rewardAdManager;
@@ -45,138 +45,80 @@ public class MainActivity extends Activity {
         root.setGravity(Gravity.CENTER_HORIZONTAL);
         scroll.addView(root);
 
-        TextView title = new TextView(this);
-        title.setText("🐾 Pypet Python Academy");
-        title.setTextSize(26);
-        title.setTextColor(Color.DKGRAY);
-        root.addView(title);
-
-        status = new TextView(this);
-        status.setText("Meet Pip. Learn Python by teaching Pip new tricks.");
-        status.setTextSize(18);
-        root.addView(status);
-
-        petView = new TextView(this);
-        petView.setText("🐶");
-        petView.setTextSize(72);
-        petView.setGravity(Gravity.CENTER);
-        root.addView(petView, new LinearLayout.LayoutParams(-1, 150));
-        safety.suppressHaptics(petView);
-        animatePet();
+        TextView title = new TextView(this); title.setText("🐾 Pypet Python Academy"); title.setTextSize(26); title.setTextColor(Color.DKGRAY); root.addView(title);
+        status = new TextView(this); status.setText("Meet Pip. Learn Python by teaching Pip new tricks."); status.setTextSize(18); root.addView(status);
+        petView = new TextView(this); petView.setText("🐶"); petView.setTextSize(72); petView.setGravity(Gravity.CENTER); root.addView(petView, new LinearLayout.LayoutParams(-1, 150));
+        safety.suppressHaptics(petView); animatePet();
 
         LinearLayout petButtons = new LinearLayout(this);
-        Button feed = button("Feed Pip");
-        Button play = button("Play");
-        Button learn = button("Learn");
-        petButtons.addView(feed); petButtons.addView(play); petButtons.addView(learn);
-        root.addView(petButtons);
+        Button feed = button("Feed Pip"); Button play = button("Play"); Button learn = button("Learn");
+        petButtons.addView(feed); petButtons.addView(play); petButtons.addView(learn); root.addView(petButtons);
         safety.suppressHaptics(feed); safety.suppressHaptics(play); safety.suppressHaptics(learn);
 
-        Button music = button("♫ Music: ON");
-        root.addView(music);
-        music.setOnClickListener(v -> {
-            audio.setEnabled(!audio.isEnabled());
-            music.setText(audio.isEnabled() ? "♫ Music: ON" : "♫ Music: OFF");
-            if (audio.isEnabled()) audio.start();
-        });
-        safety.suppressHaptics(music);
-        audio.start();
+        Button music = button("♫ Music: ON"); root.addView(music);
+        music.setOnClickListener(v -> { audio.setEnabled(!audio.isEnabled()); music.setText(audio.isEnabled() ? "♫ Music: ON" : "♫ Music: OFF"); if (audio.isEnabled()) audio.start(); });
+        safety.suppressHaptics(music); audio.start();
 
-        Button motion = button(safety.reducedMotion() ? "Animation: OFF" : "Animation: ON");
-        root.addView(motion);
-        motion.setOnClickListener(v -> {
-            safety.setReducedMotion(!safety.reducedMotion());
-            motion.setText(safety.reducedMotion() ? "Animation: OFF" : "Animation: ON");
-            petView.clearAnimation();
-            status.setText(safety.reducedMotion() ? "Reduced-motion mode enabled." : "Gentle animation enabled.");
-            if (!safety.reducedMotion()) animatePet();
-        });
+        Button motion = button(safety.reducedMotion() ? "Animation: OFF" : "Animation: ON"); root.addView(motion);
+        motion.setOnClickListener(v -> { safety.setReducedMotion(!safety.reducedMotion()); motion.setText(safety.reducedMotion() ? "Animation: OFF" : "Animation: ON"); petView.clearAnimation(); status.setText(safety.reducedMotion() ? "Reduced-motion mode enabled." : "Gentle animation enabled."); if (!safety.reducedMotion()) animatePet(); });
         safety.suppressHaptics(motion);
+        TextView safetyNote = new TextView(this); safetyNote.setText("Safety mode: no intentional flashing, strobing, screen shake, rapid animation, or reward haptics. Animation can be turned off."); root.addView(safetyNote);
 
-        TextView safetyNote = new TextView(this);
-        safetyNote.setText("Safety mode: no intentional flashing, strobing, screen shake, rapid animation, or reward haptics. Animation can be turned off.");
-        root.addView(safetyNote);
-
-        editor = new EditText(this);
-        editor.setGravity(Gravity.TOP | Gravity.START);
-        editor.setText("answer = 2 + 3\nprint(answer)");
-        editor.setHint("Write Python here...");
-        editor.setMinLines(8);
-        root.addView(editor, new LinearLayout.LayoutParams(-1, 0, 1));
-
-        Button run = button("Run Python Lesson");
-        root.addView(run);
-        safety.suppressHaptics(run);
+        editor = new EditText(this); editor.setGravity(Gravity.TOP | Gravity.START); editor.setText("answer = 2 + 3\nprint(answer)"); editor.setHint("Write Python here..."); editor.setMinLines(8); root.addView(editor, new LinearLayout.LayoutParams(-1, 0, 1));
+        Button run = button("Run Python Lesson"); root.addView(run); safety.suppressHaptics(run);
 
         root.addView(sectionTitle("✨ Treasure Trove"));
-        TextView treasureInfo = new TextView(this);
-        treasureInfo.setText("Special cosmetic treasures for your Pypet world. Your Python lessons, normal pets, core gameplay and unicorn never require a purchase.");
-        root.addView(treasureInfo);
-        Button treasureStore = button("✨ Open Treasure Trove");
-        root.addView(treasureStore);
-        treasureStore.setOnClickListener(v -> TreasureStore.show(this));
-        safety.suppressHaptics(treasureStore);
+        TextView treasureInfo = new TextView(this); treasureInfo.setText("Optional cosmetic treasures for your Pypet world. Core lessons and pets remain available without purchase."); root.addView(treasureInfo);
+        Button treasureStore = button("✨ Open Treasure Trove"); root.addView(treasureStore); treasureStore.setOnClickListener(v -> TreasureStore.show(this)); safety.suppressHaptics(treasureStore);
+
+        root.addView(sectionTitle("🪙 Pypet Coins & World Collection"));
+        TextView coinExplanation = new TextView(this); coinExplanation.setText("Pypet Coins are original in-game currency. Earn them by caring for Pip, learning Python, and completing daily-style activities. Optional rewarded ads can provide an additional way to earn coins. Coins buy cosmetic world items; they never unlock lessons or essential care."); root.addView(coinExplanation);
+        rewardStatus = new TextView(this); root.addView(rewardStatus);
+
+        root.addView(sectionTitle("Today's Activities"));
+        taskStatus = new TextView(this); taskStatus.setText("Complete each activity once to collect its coin reward."); root.addView(taskStatus);
+        Button feedTask = button("Care for Pip  •  +10 coins"); Button learnTask = button("Complete a Python lesson  •  +25 coins"); Button playTask = button("Play with Pip  •  +10 coins");
+        root.addView(feedTask); root.addView(learnTask); root.addView(playTask);
+        safety.suppressHaptics(feedTask); safety.suppressHaptics(learnTask); safety.suppressHaptics(playTask);
+        feedTask.setOnClickListener(v -> completeTask("care_pip", 10, "Care task complete!"));
+        learnTask.setOnClickListener(v -> completeTask("python_lesson", 25, "Learning task complete!"));
+        playTask.setOnClickListener(v -> completeTask("play_pip", 10, "Play task complete!"));
 
         root.addView(sectionTitle("🎁 Earnable World Rewards"));
-        TextView rewardExplanation = new TextView(this);
-        rewardExplanation.setText("Optional sponsored world items use Pypet Coins. Watch an optional rewarded ad to earn coins. Ads never gate lessons or core pets.");
-        root.addView(rewardExplanation);
-        rewardStatus = new TextView(this);
-        root.addView(rewardStatus);
-        earnButton = button("Watch optional ad: +" + RewardAdManager.COINS_PER_REWARDED_AD + " Pypet Coins");
-        root.addView(earnButton);
-        safety.suppressHaptics(earnButton);
-
-        List<String> rewardNames = new ArrayList<>();
-        for (RewardCatalog.Item item : RewardCatalog.all()) rewardNames.add(item.name + " — " + item.priceCoins + " Pypet Coins");
-        rewardSpinner = new Spinner(this);
-        rewardSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, rewardNames));
-        root.addView(rewardSpinner);
-        buyButton = button("Unlock selected reward");
-        root.addView(buyButton);
-        safety.suppressHaptics(buyButton);
-
-        TextView policyNote = new TextView(this);
-        policyNote.setText("You choose whether to watch each rewarded ad. Skipping never blocks normal gameplay. Earned items are non-transferable.");
-        root.addView(policyNote);
+        TextView rewardExplanation = new TextView(this); rewardExplanation.setText("Choose a cosmetic item and spend your earned Pypet Coins. Watching an ad is always optional."); root.addView(rewardExplanation);
+        earnButton = button("Watch optional ad: +" + RewardAdManager.COINS_PER_REWARDED_AD + " Pypet Coins"); root.addView(earnButton); safety.suppressHaptics(earnButton);
+        List<String> rewardNames = new ArrayList<>(); for (RewardCatalog.Item item : RewardCatalog.all()) rewardNames.add(item.name + " — " + item.priceCoins + " Pypet Coins");
+        rewardSpinner = new Spinner(this); rewardSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, rewardNames)); root.addView(rewardSpinner);
+        buyButton = button("Unlock selected reward"); root.addView(buyButton); safety.suppressHaptics(buyButton);
+        TextView policyNote = new TextView(this); policyNote.setText("Coins and earned cosmetics are local to this game profile and non-transferable. No task requires an advertisement or payment."); root.addView(policyNote);
 
         refreshRewardStatus();
-        feed.setOnClickListener(v -> { status.setText("Pip is happily eating. +15 hunger"); audio.petSound(330); animatePet(); });
-        play.setOnClickListener(v -> { status.setText("Pip wants to play. +10 happiness"); audio.petSound(392); animatePet(); });
-        learn.setOnClickListener(v -> { status.setText("Lesson progress recorded. Next: variables and expressions."); audio.petSound(523); animatePet(); });
+        feed.setOnClickListener(v -> { status.setText("Pip is happily eating. +15 hunger"); audio.petSound(330); completeTask("care_pip", 10, "Pip is cared for! +10 coins"); animatePet(); });
+        play.setOnClickListener(v -> { status.setText("Pip wants to play. +10 happiness"); audio.petSound(392); completeTask("play_pip", 10, "Play activity complete! +10 coins"); animatePet(); });
+        learn.setOnClickListener(v -> { status.setText("Lesson progress recorded. Next: variables and expressions."); audio.petSound(523); completeTask("python_lesson", 25, "Python lesson complete! +25 coins"); animatePet(); });
         run.setOnClickListener(v -> runCode());
         earnButton.setOnClickListener(v -> earnCoins());
         buyButton.setOnClickListener(v -> purchaseSelectedItem());
         setContentView(scroll);
     }
 
+    private void completeTask(String id, int coins, String message) {
+        if (RewardInventory.completeTask(this, id, coins)) { taskStatus.setText(message); status.setText(message); refreshRewardStatus(); audio.petSound(523); animatePet(); }
+        else taskStatus.setText("That activity has already been completed for this cycle.");
+    }
+
     private void animatePet() {
         if (petView == null || !safety.allowAnimation()) return;
-        ScaleAnimation bounce = new ScaleAnimation(
-                0.98f, 1.02f, 0.98f, 1.02f,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 1.0f);
-        bounce.setDuration(safety.safeAnimationDuration(750));
-        bounce.setRepeatCount(1);
-        bounce.setRepeatMode(Animation.REVERSE);
-        petView.startAnimation(bounce);
+        ScaleAnimation bounce = new ScaleAnimation(0.98f, 1.02f, 0.98f, 1.02f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 1.0f);
+        bounce.setDuration(safety.safeAnimationDuration(750)); bounce.setRepeatCount(1); bounce.setRepeatMode(Animation.REVERSE); petView.startAnimation(bounce);
     }
-
-    private TextView sectionTitle(String text) {
-        TextView v = new TextView(this);
-        v.setText(text); v.setTextSize(22); v.setTextColor(Color.DKGRAY); v.setPadding(0,24,0,8);
-        return v;
-    }
-
+    private TextView sectionTitle(String text) { TextView v = new TextView(this); v.setText(text); v.setTextSize(22); v.setTextColor(Color.DKGRAY); v.setPadding(0,24,0,8); return v; }
     private Button button(String text) { Button b = new Button(this); b.setText(text); return b; }
 
     private void earnCoins() {
         earnButton.setEnabled(false);
         rewardAdManager.show(this, new RewardAdManager.RewardListener() {
-            public void onCoinsGranted(int coins) {
-                refreshRewardStatus(); status.setText("You earned " + coins + " Pypet Coins.");
-                animatePet(); audio.petSound(523); earnButton.setEnabled(true);
-            }
+            public void onCoinsGranted(int coins) { refreshRewardStatus(); status.setText("You earned " + coins + " Pypet Coins."); animatePet(); audio.petSound(523); earnButton.setEnabled(true); }
             public void onAdUnavailable(String message) { status.setText(message); earnButton.setEnabled(true); }
         });
     }
@@ -185,29 +127,12 @@ public class MainActivity extends Activity {
         RewardCatalog.Item item = RewardCatalog.all().get(rewardSpinner.getSelectedItemPosition());
         if (RewardInventory.owns(this, item.id)) { status.setText("You already own " + item.name + "."); return; }
         int balance = RewardInventory.coins(this);
-        if (balance < item.priceCoins) {
-            new AlertDialog.Builder(this).setTitle("Not enough Pypet Coins")
-                    .setMessage(item.name + " costs " + item.priceCoins + " coins. You have " + balance + ".")
-                    .setPositiveButton("Earn Coins", (d,w) -> earnCoins()).setNegativeButton("Cancel",null).show();
-            return;
-        }
-        new AlertDialog.Builder(this).setTitle("Unlock " + item.name + "?")
-                .setMessage(item.description + "\n\nPrice: " + item.priceCoins + " Pypet Coins.")
-                .setPositiveButton("Unlock", (d,w) -> {
-                    if (RewardInventory.purchase(this,item.id)) {
-                        try { py.getModule("world_api").callAttr("place_exclusive_item",item.id,"home"); } catch(Exception ignored) {}
-                        refreshRewardStatus(); status.setText(item.name + " has been added to your world."); animatePet(); audio.petSound(440);
-                    } else status.setText("Purchase could not be completed.");
-                }).setNegativeButton("No thanks",null).show();
+        if (balance < item.priceCoins) { new AlertDialog.Builder(this).setTitle("Not enough Pypet Coins").setMessage(item.name + " costs " + item.priceCoins + " coins. You have " + balance + ".").setPositiveButton("Earn Coins", (d,w) -> earnCoins()).setNegativeButton("Cancel",null).show(); return; }
+        new AlertDialog.Builder(this).setTitle("Unlock " + item.name + "?").setMessage(item.description + "\n\nPrice: " + item.priceCoins + " Pypet Coins.").setPositiveButton("Unlock", (d,w) -> { if (RewardInventory.purchase(this,item.id)) { try { py.getModule("world_api").callAttr("place_exclusive_item",item.id,"home"); } catch(Exception ignored) {} refreshRewardStatus(); status.setText(item.name + " has been added to your world."); animatePet(); audio.petSound(440); } else status.setText("Purchase could not be completed."); }).setNegativeButton("No thanks",null).show();
     }
 
-    private void refreshRewardStatus() { rewardStatus.setText("Pypet Coins: " + RewardInventory.coins(this) + " | Earned world items: " + RewardInventory.count(this) + " / " + RewardCatalog.all().size()); }
-
-    private void runCode() {
-        try { String result = py.getModule("pypet_engine").callAttr("run_lesson",editor.getText().toString()).toString(); status.setText(result); audio.petSound(523); animatePet(); }
-        catch(Exception e) { status.setText("Lesson error: " + e.getMessage()); audio.petSound(196); }
-    }
-
+    private void refreshRewardStatus() { rewardStatus.setText("Pypet Coins: " + RewardInventory.coins(this) + " | World items: " + RewardInventory.count(this) + " / " + RewardCatalog.all().size()); }
+    private void runCode() { try { String result = py.getModule("pypet_engine").callAttr("run_lesson",editor.getText().toString()).toString(); status.setText(result); audio.petSound(523); animatePet(); } catch(Exception e) { status.setText("Lesson error: " + e.getMessage()); audio.petSound(196); } }
     @Override protected void onPause() { super.onPause(); audio.stop(); }
     @Override protected void onResume() { super.onResume(); if(audio != null && audio.isEnabled()) audio.start(); }
     @Override protected void onDestroy() { audio.stop(); super.onDestroy(); }
