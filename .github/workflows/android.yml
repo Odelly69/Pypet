@@ -44,11 +44,11 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
-      - name: Generate Gradle wrapper
-        run: gradle wrapper --gradle-version 8.11.1
-      # Production gate: compile before any APK verification/upload.
+      # Use the Gradle distribution supplied by setup-gradle directly. Generating
+      # a wrapper here was an unnecessary failure point and previously stopped the
+      # APK build before compilation.
       - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: gradle assembleDebug --stacktrace
       - name: Verify APK
         run: test -s app/build/outputs/apk/debug/app-debug.apk
       - name: Upload installable APK
