@@ -1,8 +1,13 @@
-# Pypet Final Acceptance Baseline
+# PyPet Final Acceptance Baseline
 
 Status: LOCKED
 
-This document is the implementation acceptance checklist for the unified Pypet design. New features must extend this baseline without removing previously locked requirements.
+This document is the implementation acceptance checklist for the unified PyPet design. New features must extend this baseline without removing previously locked requirements.
+
+## Product naming
+- User-facing product name is **PyPet**.
+- The capitalization is intentional: Python + Pet, with a programmer-style naming joke.
+- Source identifiers remain conventional for their programming language and are not forced to match product branding.
 
 ## Active-pet lifecycle
 - Exactly one pet is the active care/learning subject at a time.
@@ -24,11 +29,15 @@ This document is the implementation acceptance checklist for the unified Pypet d
 - Animations cover idle, walk/run, eat, drink, sleep, groom, bathe, play, interact, react and social behaviors.
 
 ## Immersive world
-- World is the primary gameplay surface.
+- World is the primary gameplay surface and fills the available display rather than being constrained to a small centered map.
+- Roads form a connected town network with sidewalks and usable building lots.
+- Permanent buildings sit beside roads rather than on roadways or implausibly far from access.
 - Home has usable rooms including kitchen, bathroom, bedroom and living areas.
 - Food preparation, eating, drinking, shower/bath, grooming, sleep and play are physical world interactions.
 - Outdoor areas include yard/garden and expandable exploration regions.
+- The park is visually identifiable as a park through a defined boundary, entrance, sign, paths, pond, playground, benches, trees and planted areas.
 - Objects have functional interactions rather than being menu-only placeholders.
+- Player-placed objects are constrained to valid buildable land and are kept clear of roads/intersections.
 
 ## Playground
 - Player builds the playground from individually acquired objects.
