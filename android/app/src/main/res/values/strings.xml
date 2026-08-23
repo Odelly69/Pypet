@@ -1,4 +1,4 @@
 <resources>
-    <!-- Replace with the deployed HTTPS Vercel endpoint before Play production. -->
-    <string name="purchase_verification_url">https://pypet-purchase-verifier.vercel.app/api/google-play/verify-purchase</string>
+    <!-- Configure the real HTTPS verifier URL for production. Empty means purchases fail closed. -->
+    <string name="purchase_verification_url"></string>
 </resources>
