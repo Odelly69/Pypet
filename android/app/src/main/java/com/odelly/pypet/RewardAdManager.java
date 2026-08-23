@@ -12,20 +12,22 @@ import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
 /**
- * Explicit opt-in rewarded-ad bridge. Only a completed reward callback grants an item.
- * Debug builds use Google's dedicated test rewarded-ad unit.
+ * Explicit opt-in rewarded-ad bridge. A completed rewarded-ad callback creates
+ * Pypet Coins; coins are then spent on optional exclusive world items.
  */
 public final class RewardAdManager {
     private static final String TAG = "PypetRewardAd";
     private static final String LIVE_REWARDED_ID = "ca-app-pub-3352973554477677/6771650805";
     private static final String TEST_REWARDED_ID = "ca-app-pub-3940256099942544/5224354917";
+    /** One completed ad = 25 Pypet Coins. Keep this synchronized with the AdMob reward definition. */
+    public static final int COINS_PER_REWARDED_AD = 25;
 
     private final Context context;
     private RewardedAd rewardedAd;
     private boolean loading;
 
     public interface RewardListener {
-        void onRewardGranted(RewardCatalog.Item item);
+        void onCoinsGranted(int coins);
         void onAdUnavailable(String message);
     }
 
@@ -54,15 +56,7 @@ public final class RewardAdManager {
                 });
     }
 
-    public void show(Activity activity, RewardCatalog.Item item, RewardListener listener) {
-        if (item == null) {
-            listener.onAdUnavailable("Choose an exclusive world item first.");
-            return;
-        }
-        if (RewardInventory.owns(activity, item.id)) {
-            listener.onAdUnavailable("You already own this world item.");
-            return;
-        }
+    public void show(Activity activity, RewardListener listener) {
         if (rewardedAd == null) {
             preload();
             listener.onAdUnavailable("The rewarded ad is not ready yet. Please try again shortly.");
@@ -72,19 +66,14 @@ public final class RewardAdManager {
         RewardedAd ad = rewardedAd;
         rewardedAd = null;
         ad.setFullScreenContentCallback(new FullScreenContentCallback() {
-            @Override public void onAdDismissedFullScreenContent() {
-                preload();
-            }
-            @Override public void onAdFailedToShowFullScreenContent(AdError error) {
-                preload();
-            }
+            @Override public void onAdDismissedFullScreenContent() { preload(); }
+            @Override public void onAdFailedToShowFullScreenContent(AdError error) { preload(); }
         });
 
         ad.show(activity, rewardItem -> {
-            // Grant only from Google's earned-reward callback; do not grant on dismissal.
-            if (RewardInventory.grant(activity, item.id)) {
-                listener.onRewardGranted(item);
-            }
+            // Grant currency only from Google's earned-reward callback; never on dismissal.
+            RewardInventory.addCoins(activity, COINS_PER_REWARDED_AD);
+            listener.onCoinsGranted(COINS_PER_REWARDED_AD);
         });
     }
 }
