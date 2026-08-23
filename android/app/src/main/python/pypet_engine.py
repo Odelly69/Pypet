@@ -1,5 +1,6 @@
 from dataclasses import dataclass, asdict
 from typing import Any
+from pypet_curriculum import lesson_for, total_lessons, STANDARD_LIBRARY, ECOSYSTEM
 
 @dataclass
 class PetState:
@@ -9,7 +10,7 @@ class PetState:
     happiness: int = 70
     knowledge: int = 0
     xp: int = 0
-    lesson: int = 1
+    lesson: int = 0
 
     def feed(self) -> dict[str, Any]:
         self.hunger = min(100, self.hunger + 15)
@@ -26,13 +27,19 @@ class PetState:
         self.xp += xp
         return asdict(self)
 
-def run_lesson(code: str, expected: str | None = None) -> dict[str, Any]:
-    """Run a small educational Python exercise in a restricted namespace.
+def current_lesson(index: int = 0) -> dict[str, Any]:
+    return lesson_for(index)
 
-    The Android editor will use this for beginner lessons. It intentionally
-    provides no Android objects, filesystem helpers, subprocesses, or network
-    handles to student code.
-    """
+def curriculum_info() -> dict[str, Any]:
+    return {
+        'tiers': ['Novice', 'Apprentice', 'Intermediate', 'Advanced', 'Expert', 'Master'],
+        'total_lessons': total_lessons(),
+        'standard_library': STANDARD_LIBRARY,
+        'ecosystem': ECOSYSTEM,
+    }
+
+def run_lesson(code: str, expected: str | None = None) -> dict[str, Any]:
+    """Run a hands-on exercise in a restricted namespace."""
     safe_builtins = {
         'abs': abs, 'all': all, 'any': any, 'bool': bool, 'dict': dict,
         'enumerate': enumerate, 'filter': filter, 'float': float,
