@@ -144,11 +144,16 @@ public class MainActivity extends Activity {
         rewardButton.setEnabled(false);
         rewardAdManager.show(this, item, new RewardAdManager.RewardListener() {
             @Override public void onRewardGranted(RewardCatalog.Item rewardedItem) {
+                try {
+                    py.getModule("world_api").callAttr("place_exclusive_item", rewardedItem.id, "home");
+                } catch (Exception e) {
+                    status.setText("Unlocked " + rewardedItem.name + ", but world placement will retry: " + e.getMessage());
+                }
                 rewardStatus.setText("Unlocked: " + rewardedItem.name + "! Owned: "
                         + RewardInventory.count(MainActivity.this) + " / " + RewardCatalog.all().size());
                 rewardButton.setEnabled(true);
                 rewardButton.setText("Already owned: " + rewardedItem.name);
-                status.setText(rewardedItem.name + " has been added to your world-item collection.");
+                status.setText(rewardedItem.name + " has been added to your world-item collection and placed at home.");
             }
 
             @Override public void onAdUnavailable(String message) {
