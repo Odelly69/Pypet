@@ -21,7 +21,8 @@ public class MainActivity extends Activity {
     Python py;
     RewardAdManager rewardAdManager;
     Spinner rewardSpinner;
-    Button rewardButton;
+    Button earnButton;
+    Button buyButton;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -72,42 +73,37 @@ public class MainActivity extends Activity {
 
         root.addView(sectionTitle("🎁 Reward Center"));
         TextView rewardExplanation = new TextView(this);
-        rewardExplanation.setText("Optional sponsored world items. Your Python lessons, pet care, normal pets, and unicorn are never locked behind ads.");
+        rewardExplanation.setText("Optional sponsored world items use Pypet Coins. Watch an optional rewarded ad to earn coins, then choose which exclusive item to buy. Python lessons, pet care, normal pets, and the unicorn are never locked behind ads.");
         root.addView(rewardExplanation);
 
+        rewardStatus = new TextView(this);
+        root.addView(rewardStatus);
+
+        earnButton = button("Watch optional ad: +" + RewardAdManager.COINS_PER_REWARDED_AD + " Pypet Coins");
+        root.addView(earnButton);
+
         List<String> rewardNames = new ArrayList<>();
-        for (RewardCatalog.Item item : RewardCatalog.all()) rewardNames.add(item.name);
+        for (RewardCatalog.Item item : RewardCatalog.all()) {
+            rewardNames.add(item.name + " — " + item.priceCoins + " Pypet Coins");
+        }
         rewardSpinner = new Spinner(this);
         rewardSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, rewardNames));
         root.addView(rewardSpinner);
 
-        rewardStatus = new TextView(this);
-        rewardStatus.setText("Owned: " + RewardInventory.count(this) + " / " + RewardCatalog.all().size());
-        root.addView(rewardStatus);
-
-        rewardButton = button("Watch optional ad to unlock item");
-        root.addView(rewardButton);
+        buyButton = button("Buy selected item");
+        root.addView(buyButton);
 
         TextView policyNote = new TextView(this);
-        policyNote.setText("You choose whether to watch each rewarded ad. Skipping or declining never blocks normal gameplay.");
+        policyNote.setText("You choose whether to watch each rewarded ad. Skipping or declining never blocks normal gameplay. Coins and items are non-transferable game content.");
         root.addView(policyNote);
 
+        refreshRewardStatus();
         feed.setOnClickListener(v -> status.setText("Pip is happily eating. +15 hunger"));
         play.setOnClickListener(v -> status.setText("Pip wants to play. +10 happiness"));
         learn.setOnClickListener(v -> status.setText("Lesson progress recorded. Next: variables and expressions."));
         run.setOnClickListener(v -> runCode());
-
-        rewardSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, android.view.View view, int position, long id) {
-                RewardCatalog.Item item = RewardCatalog.all().get(position);
-                rewardButton.setText(RewardInventory.owns(MainActivity.this, item.id)
-                        ? "Already owned: " + item.name
-                        : "Watch optional ad to unlock " + item.name);
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
-        });
-
-        rewardButton.setOnClickListener(v -> requestReward());
+        earnButton.setOnClickListener(v -> earnCoins());
+        buyButton.setOnClickListener(v -> purchaseSelectedItem());
         setContentView(scroll);
     }
 
@@ -124,43 +120,64 @@ public class MainActivity extends Activity {
         Button b = new Button(this); b.setText(text); return b;
     }
 
-    private void requestReward() {
+    private void earnCoins() {
+        earnButton.setEnabled(false);
+        rewardAdManager.show(this, new RewardAdManager.RewardListener() {
+            @Override public void onCoinsGranted(int coins) {
+                refreshRewardStatus();
+                status.setText("You earned " + coins + " Pypet Coins. Choose an exclusive world item to buy.");
+                earnButton.setEnabled(true);
+            }
+            @Override public void onAdUnavailable(String message) {
+                status.setText(message);
+                earnButton.setEnabled(true);
+            }
+        });
+    }
+
+    private void purchaseSelectedItem() {
         RewardCatalog.Item item = RewardCatalog.all().get(rewardSpinner.getSelectedItemPosition());
         if (RewardInventory.owns(this, item.id)) {
-            rewardStatus.setText("You already own " + item.name + ".");
+            status.setText("You already own " + item.name + ".");
+            return;
+        }
+        int balance = RewardInventory.coins(this);
+        if (balance < item.priceCoins) {
+            int needed = item.priceCoins - balance;
+            new AlertDialog.Builder(this)
+                    .setTitle("Not enough Pypet Coins")
+                    .setMessage(item.name + " costs " + item.priceCoins + " coins. You have " + balance + " and need " + needed + " more.")
+                    .setPositiveButton("Earn Coins", (dialog, which) -> earnCoins())
+                    .setNegativeButton("Cancel", null)
+                    .show();
             return;
         }
 
-        // Clear disclosure and affirmative opt-in before every rewarded ad.
         new AlertDialog.Builder(this)
-                .setTitle("Unlock " + item.name + "?")
-                .setMessage("Watch an optional rewarded ad to receive 1 exclusive, non-transferable " + item.name + " for your Pypet world. You can choose No and continue playing normally.")
-                .setPositiveButton("Watch ad", (dialog, which) -> showRewardedAd(item))
+                .setTitle("Buy " + item.name + "?")
+                .setMessage(item.description + "\n\nPrice: " + item.priceCoins + " Pypet Coins. Your balance after purchase: " + (balance - item.priceCoins) + ".")
+                .setPositiveButton("Buy", (dialog, which) -> {
+                    if (RewardInventory.purchase(this, item.id)) {
+                        try {
+                            py.getModule("world_api").callAttr("place_exclusive_item", item.id, "home");
+                        } catch (Exception e) {
+                            status.setText("Bought " + item.name + ", but world placement will retry: " + e.getMessage());
+                        }
+                        refreshRewardStatus();
+                        status.setText(item.name + " has been added to your world-item collection and placed at home.");
+                    } else {
+                        refreshRewardStatus();
+                        status.setText("Purchase could not be completed.");
+                    }
+                })
                 .setNegativeButton("No thanks", null)
                 .show();
     }
 
-    private void showRewardedAd(RewardCatalog.Item item) {
-        rewardButton.setEnabled(false);
-        rewardAdManager.show(this, item, new RewardAdManager.RewardListener() {
-            @Override public void onRewardGranted(RewardCatalog.Item rewardedItem) {
-                try {
-                    py.getModule("world_api").callAttr("place_exclusive_item", rewardedItem.id, "home");
-                } catch (Exception e) {
-                    status.setText("Unlocked " + rewardedItem.name + ", but world placement will retry: " + e.getMessage());
-                }
-                rewardStatus.setText("Unlocked: " + rewardedItem.name + "! Owned: "
-                        + RewardInventory.count(MainActivity.this) + " / " + RewardCatalog.all().size());
-                rewardButton.setEnabled(true);
-                rewardButton.setText("Already owned: " + rewardedItem.name);
-                status.setText(rewardedItem.name + " has been added to your world-item collection and placed at home.");
-            }
-
-            @Override public void onAdUnavailable(String message) {
-                rewardStatus.setText(message);
-                rewardButton.setEnabled(true);
-            }
-        });
+    private void refreshRewardStatus() {
+        rewardStatus.setText("Pypet Coins: " + RewardInventory.coins(this)
+                + "    |    Exclusive items owned: " + RewardInventory.count(this)
+                + " / " + RewardCatalog.all().size());
     }
 
     private void runCode() {
