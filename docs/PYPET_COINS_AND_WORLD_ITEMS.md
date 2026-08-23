@@ -1,59 +1,70 @@
-# Pypet Coins & World Collection
+# Pypet Coins, Ad-Coin Items & Treasure Trove
 
-Pypet Coins are an original, non-transferable in-game currency used for optional cosmetic world customization.
+Pypet now uses three complementary, clearly labeled cosmetic collections.
 
-## How players earn coins
+## 1. Gameplay Coin Collection
 
-- Care for Pip: 10 coins once per activity cycle.
-- Play with Pip: 10 coins once per activity cycle.
-- Complete a Python lesson: 25 coins once per activity cycle.
-- Optional rewarded advertisement: the configured rewarded-ad amount.
+Players earn Pypet Coins directly by playing:
 
-No advertisement or purchase is required to access Python lessons, core pet care, or core gameplay.
+- Care for Pip: 10 coins.
+- Play with Pip: 10 coins.
+- Complete a Python lesson: 25 coins.
 
-## Economy principles
+These rewards are gameplay-first and do not require advertisements.
 
-- Coins are not real-world currency.
+## 2. Ad-Coin Collection
+
+Rewarded ads provide an optional accelerated way to earn the same Pypet Coins. Completing an ad grants the configured rewarded amount only from Google's earned-reward callback. Ads never grant an item directly.
+
+The dedicated Ad-Coin collection contains:
+
+- Cloud Lounge — 75 coins
+- Sparkle Garden — 125 coins
+- Comet Cart — 175 coins
+- Pocket Airship — 250 coins
+- Crystal Cabin — 300 coins
+- Sky Garden — 400 coins
+- Moonstone Marker — 500 coins
+- Pocket Code Lab — 600 coins
+- Starship Dock — 750 coins
+- Cloud Palace — 1,000 coins
+
+These items remain obtainable with coins earned from gameplay; ads simply provide another optional earning path.
+
+## 3. Treasure Trove
+
+Treasure Trove contains premium original world bundles sold through Google Play. Current concepts include:
+
+- Little Treasure — $0.99
+- Shiny Treasure — $1.99
+- Rare Treasure — $4.99
+- Royal Garden Estate — $9.99
+- Celestial Academy — $19.99
+- Dreamworld Collection — $29.99
+- Skybound Realm — $14.99
+- Deepsea Discovery Dome — $14.99
+- Enchanted Canopy — $12.99
+- Stargazer Observatory — $7.99
+- Sky Dragon Sanctuary — $19.99
+- Pypet Space Harbor — $24.99
+- Master Maker Campus — $19.99
+- Storybook Valley — $14.99
+- Wonderlight Festival — $9.99
+- Crystal Cavern Realm — $17.99
+
+Premium purchases remain separate from the coin wallet and must use authoritative Play purchase verification before high-value content is granted.
+
+## Design/IP principles
+
+Pypet's visual language is cozy coding-fantasy: rounded miniature buildings, friendly creatures, gardens, maker spaces, astronomy, books, exploration, and whimsical science fiction. The designs are original concepts and should not copy another virtual-pet product's names, characters, logos, trade dress, artwork, or distinctive mechanics.
+
+## Economy safeguards
+
+- Coins are virtual currency, not cash.
 - Coins cannot be cashed out or transferred.
-- Cosmetic purchases do not affect lesson difficulty or essential gameplay.
-- Task rewards are granted once per task ID; future reset/rotation logic can replace the current lifetime task flags.
-- High-value real-money purchases remain separate from the coin economy and use authoritative Play purchase verification.
-
-## Original item design language
-
-Pypet uses its own cozy coding-fantasy visual language: rounded miniature buildings, friendly creatures, garden landmarks, maker spaces, astronomy, books, and whimsical science-fiction decorations. Items intentionally avoid copying names, characters, logos, trade dress, or distinctive mechanics from existing virtual-pet brands.
-
-### Current collection
-
-- Aurora Tree — 25
-- Sunny Nook Bench — 15
-- Berry Patch — 20
-- Rainbow Garden Arch — 40
-- Cloud Pillow — 35
-- Tiny Castle — 100
-- Pet Carousel — 90
-- Starlight Visitor Pad — 150
-- Wizard's Workshop — 200
-- Miniature Garden Train — 125
-- Floating Garden Island — 300
-- Tiny Fantasy Volcano — 150
-- Moonmane Fountain — 100
-- Dragon-Roost Tower — 250
-- Buddy Bot Station — 125
-- Glowgarden — 75
-- Giant Floating Library — 350
-- Pocket Planetarium — 400
-- Maker's Studio — 150
-- Cloudwatch Observatory — 300
-- Cozy Campground — 100
-- Prism Creek Bridge — 200
-- Moonlit Garden — 175
-- Stargazer Gazebo — 125
-- Crystal Spring — 250
-- Pypet Treehouse — 225
-- Code Café — 175
-- Pixel Garden — 80
-- Maker Workbench — 120
-- Storybook Stage — 160
-
-All descriptions and names are original Pypet concepts and should continue to be reviewed for trademark/copyright conflicts before commercial launch.
+- No purchase or advertisement is required for core gameplay or lessons.
+- Rewarded ads are explicit opt-in.
+- An ad dismissal does not award coins.
+- Cosmetic purchases do not affect lesson difficulty or essential pet care.
+- Task rewards are protected against duplicate claims by task ID.
+- Real-money purchases remain separately verified through the backend purchase-verification system.
