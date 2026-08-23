@@ -60,7 +60,7 @@ public final class PypetSchoolView {
             if(si<0||si>=allowed.size())return;selectedLesson[0]=allowed.get(si);session[0]=new AcademyLessonSession(a,selectedLesson[0].id);
             mission.setText("🎯 "+selectedLesson[0].title+"\nSkill: "+selectedLesson[0].skill+"\n\nHands-on mission: "+selectedLesson[0].task);
             code.setText(a.getSharedPreferences(PREFS,0).getString(CODE,""));
-            int idx=PypetCurriculum.indexOf(selectedLesson[0].id);lock.setText(idx<masteredNow?"📖 Review mode — this lesson is already mastered.":"▶ CURRENT LESSON — future lessons unlock only after mastery.");updateStage();
+            int idx=PypetCurriculum.indexOf(selectedLesson[0].id);lock.setText(idx<masteredNow?"📖 Review mode — this lesson is already mastered.":"▶ CURRENT LESSON — future lessons unlock only after mastery.");updateStage.run();
         };
         moduleSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onItemSelected(android.widget.AdapterView<?> p,android.view.View v,int pos,long id){refreshLessons.run();}public void onNothingSelected(android.widget.AdapterView<?> p){}});
         lessonSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onItemSelected(android.widget.AdapterView<?> p,android.view.View v,int pos,long id){showSelected.run();}public void onNothingSelected(android.widget.AdapterView<?> p){}});
@@ -70,7 +70,7 @@ public final class PypetSchoolView {
             if(selectedLesson[0]==null||session[0]==null)return;
             String source=code.getText().toString().trim(); if(source.isEmpty()){result.setText("✏️ Write the code yourself first.");return;}
             a.getSharedPreferences(PREFS,0).edit().putString(CODE,source).apply();
-            try{PyObject py=Python.getInstance().getModule("pypet_engine");String output=py.callAttr("run_lesson",source).toString();result.setText("🧪 Result\n"+output);boolean passed=output.contains("'ok': True")&&output.contains("'passed': True");session[0].recordRun(passed);if(passed){result.append("\n\n✓ Run succeeded. Inspect the result, debug it, practice, apply it, then advance through the remaining stages.");updateStage();}else result.append("\n\n💡 Not mastered yet. Inspect the result, debug your code and run it again.");}catch(Exception e){result.setText("Keep experimenting.\n"+e.getMessage());}
+            try{PyObject py=Python.getInstance().getModule("pypet_engine");String output=py.callAttr("run_lesson",source).toString();result.setText("🧪 Result\n"+output);boolean passed=output.contains("'ok': True")&&output.contains("'passed': True");session[0].recordRun(passed);if(passed){result.append("\n\n✓ Run succeeded. Inspect the result, debug it, practice, apply it, then advance through the remaining stages.");updateStage.run();}else result.append("\n\n💡 Not mastered yet. Inspect the result, debug your code and run it again.");}catch(Exception e){result.setText("Keep experimenting.\n"+e.getMessage());}
         });
 
         nextStage.setOnClickListener(v->{
@@ -82,7 +82,7 @@ public final class PypetSchoolView {
                 return;
             }
             if(!session[0].advance()){new AlertDialog.Builder(a).setTitle("Keep working").setMessage("Complete the current hands-on activity first. Write and run your code when the stage asks for it.").setPositiveButton("Continue",null).show();return;}
-            updateStage();
+            updateStage.run();
         });
         hint.setOnClickListener(v->{if(selectedLesson[0]!=null)new AlertDialog.Builder(a).setTitle("💡 Hint").setMessage("Current skill: "+selectedLesson[0].skill+"\n\nBreak the mission into the smallest working step. Keep your previous code, inspect intermediate values, change one thing at a time, and explain the result.").setPositiveButton("Got it",null).show();});
         TextView career=new TextView(a);career.setText("\n📚 Full pathway: Python foundations, practical standard library, OOP, testing, APIs, SQL, Tkinter, Pygame, coordinates/resolution, graphics, 3D, animation, Git/GitHub, portfolio work and job readiness.\n\n🐾 Your demonstrated learning is the pet's learning and World development.");career.setTextSize(14);root.addView(career);
