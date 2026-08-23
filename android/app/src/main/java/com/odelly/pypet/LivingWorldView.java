@@ -1,0 +1,65 @@
+package com.odelly.pypet;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.graphics.*;
+import android.graphics.drawable.ColorDrawable;
+import android.view.*;
+import android.widget.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+/** Main living town surface: whole-world navigation plus independently wandering pet. */
+public final class LivingWorldView {
+    private LivingWorldView() {}
+    public static void show(Activity a) {
+        final World world = new World(a);
+        FrameLayout root = new FrameLayout(a);
+        root.addView(world, new FrameLayout.LayoutParams(-1,-1));
+        TextView title = new TextView(a);
+        title.setText("🌎 " + PypetProfileManager.townName(a) + " • PYPET WORLD");
+        title.setTextSize(20); title.setGravity(Gravity.CENTER); title.setBackgroundColor(Color.argb(235,250,247,232));
+        FrameLayout.LayoutParams tp = new FrameLayout.LayoutParams(-1,48,Gravity.TOP); root.addView(title,tp);
+        TextView help = new TextView(a);
+        help.setText("Pinch = zoom whole world • drag = move • tap a building = activity"); help.setTextSize(12); help.setGravity(Gravity.CENTER); help.setBackgroundColor(Color.argb(225,250,247,232));
+        FrameLayout.LayoutParams hp = new FrameLayout.LayoutParams(-1,38,Gravity.TOP); hp.topMargin=48; root.addView(help,hp);
+        LinearLayout controls = new LinearLayout(a); controls.setGravity(Gravity.CENTER); controls.setPadding(5,3,5,3); controls.setBackgroundColor(Color.argb(235,250,247,232));
+        Button out=btn("−"), reset=btn("🌎 Reset"), in=btn("+"), profile=btn("👤"); controls.addView(out,new LinearLayout.LayoutParams(60,58)); controls.addView(reset,new LinearLayout.LayoutParams(0,58,1)); controls.addView(in,new LinearLayout.LayoutParams(60,58)); controls.addView(profile,new LinearLayout.LayoutParams(70,58));
+        FrameLayout.LayoutParams cp=new FrameLayout.LayoutParams(-1,64,Gravity.BOTTOM); root.addView(controls,cp);
+        out.setOnClickListener(v->world.zoomBy(.88f)); in.setOnClickListener(v->world.zoomBy(1.12f)); reset.setOnClickListener(v->world.reset()); profile.setOnClickListener(v->safeProfile(a));
+        a.setContentView(root);
+    }
+    private static Button btn(String s){Button b=new Button(null);return b;}
+    private static void safeProfile(Activity a){try{PypetProfileView.show(a);}catch(Throwable t){new AlertDialog.Builder(a).setMessage("Profile is temporarily unavailable.").setPositiveButton("OK",null).show();}}
+    private static final class World extends View {
+        private static final float W=1800,H=2400,MIN=.42f,MAX=2.4f;
+        private final Activity a; private final Paint p=new Paint(3),t=new Paint(3); private float zoom=.55f,ox=0,oy=0,lastX,lastY,downX,downY,lastDist; private boolean moved,alive=true;
+        private final RectF[] b=new RectF[6]; private final String[] names={"HOME","PYTHON ACADEMY","MARKET","WORKSHOP","PARK","LIBRARY"};
+        World(Activity a){super(a);this.a=a;t.setTypeface(Typeface.DEFAULT_BOLD);setLayerType(View.LAYER_TYPE_SOFTWARE,null);}
+        void stop(){alive=false;}
+        void reset(){zoom=.55f;ox=oy=0;invalidate();}
+        void zoomBy(float m){zoom=Math.max(MIN,Math.min(MAX,zoom*m));invalidate();}
+        @Override protected void onDraw(Canvas c){float fit=Math.min(getWidth()/W,getHeight()/H)*zoom;c.drawColor(Color.rgb(137,203,230));c.save();c.translate(getWidth()/2f+ox,getHeight()/2f+oy);c.scale(fit,fit);drawWorld(c);c.restore();if(alive)postInvalidateDelayed(80);}
+        private void drawWorld(Canvas c){p.setColor(Color.rgb(124,184,99));c.drawRect(-W/2,-H/2,W/2,H/2,p);p.setColor(Color.rgb(76,168,195));c.drawOval(-820,650,-130,1120,p);p.setColor(Color.rgb(70,70,68));c.drawRect(-105,-1200,105,1200,p);c.drawRoundRect(-820,-80,820,30,28,28,p);p.setColor(Color.rgb(236,212,133));p.setStrokeWidth(5);for(int y=-960;y<=960;y+=480)c.drawLine(-760,y,760,y,p);
+            house(c,-700,-900,-250,-540,"HOME",Color.rgb(157,78,61),0); academy(c,40,-900,500,-470,1); house(c,580,-330,850,0,"MARKET",Color.rgb(205,136,55),2); house(c,-760,-300,-390,30,"WORKSHOP",Color.rgb(48,116,137),3); park(c,-300,160,260,620,4); house(c,430,570,800,900,"LIBRARY",Color.rgb(99,70,130),5); trees(c); drawTrophies(c); drawPlacements(c); drawPet(c);
+            t.setTextAlign(Paint.Align.CENTER);t.setTextSize(44);t.setColor(Color.rgb(43,70,45));c.drawText(PypetProfileManager.townName(a),0,-1080,t);t.setTextSize(22);c.drawText("Your accomplishments live here",0,-1018,t);
+        }
+        private void house(Canvas c,float l,float top,float r,float bot,String n,int roof,int i){b[i]=new RectF(l,top,r,bot);float m=(l+r)/2,ww=r-l,hh=bot-top;p.setShadowLayer(10,0,5,Color.argb(60,0,0,0));p.setColor(Color.rgb(244,238,221));c.drawRoundRect(l,top,r,bot,20,20,p);p.clearShadowLayer();p.setColor(roof);Path q=new Path();q.moveTo(l-18,top+8);q.lineTo(m,top-hh*.28f);q.lineTo(r+18,top+8);q.close();c.drawPath(q,p);window(c,l+ww*.12f,top+hh*.2f,ww*.2f,hh*.17f);window(c,r-ww*.32f,top+hh*.2f,ww*.2f,hh*.17f);p.setColor(Color.rgb(102,74,53));c.drawRoundRect(m-24,bot-68,m+24,bot,7,7,p);t.setTextSize(21);t.setColor(Color.rgb(45,52,47));c.drawText(n,m,top-hh*.3f,t);}
+        private void academy(Canvas c,float l,float top,float r,float bot,int i){b[i]=new RectF(l,top,r,bot);float m=(l+r)/2,ww=r-l,hh=bot-top;p.setColor(Color.rgb(237,235,220));c.drawRoundRect(l,top,r,bot,20,20,p);p.setColor(Color.rgb(61,91,142));Path q=new Path();q.moveTo(l-15,top+5);q.lineTo(m,top-hh*.28f);q.lineTo(r+15,top+5);q.close();c.drawPath(q,p);for(int row=0;row<2;row++)for(int col=0;col<5;col++)window(c,l+25+col*(ww-50)/5,top+35+row*80,30,38);p.setColor(Color.rgb(100,70,50));c.drawRoundRect(m-24,bot-68,m+24,bot,7,7,p);t.setTextSize(21);t.setColor(Color.rgb(43,52,57));c.drawText("PYTHON ACADEMY",m,top-hh*.3f,t);}
+        private void window(Canvas c,float x,float y,float ww,float hh){p.setColor(Color.rgb(91,165,201));c.drawRoundRect(x,y,x+ww,y+hh,5,5,p);p.setColor(Color.rgb(224,234,225));p.setStrokeWidth(3);c.drawLine(x+ww/2,y,x+ww/2,y+hh,p);c.drawLine(x,y+hh/2,x+ww,y+hh/2,p);}
+        private void park(Canvas c,float l,float top,float r,float bot,int i){b[i]=new RectF(l,top,r,bot);p.setColor(Color.rgb(77,151,82));c.drawRoundRect(l,top,r,bot,30,30,p);p.setColor(Color.rgb(118,82,50));c.drawRect((l+r)/2-8,top+60,(l+r)/2+8,bot-60,p);p.setColor(Color.rgb(54,135,62));c.drawCircle((l+r)/2,top+50,55,p);t.setTextSize(20);t.setColor(Color.WHITE);c.drawText("PARK",(l+r)/2,bot-20,t);}
+        private void trees(Canvas c){for(int i=-3;i<=3;i++){float x=i*270,y=-120+i*55;p.setColor(Color.rgb(113,76,49));c.drawRect(x-7,y,x+7,y+42,p);p.setColor(Color.rgb(52,131,63));c.drawCircle(x,y,34,p);p.setColor(Color.rgb(76,153,75));c.drawCircle(x-10,y-8,20,p);}}
+        private void drawTrophies(Canvas c){int k=0;for(PypetAchievementManager.Trophy tr:PypetAchievementManager.trophies()){if(!PypetAchievementManager.hasTrophy(a,tr.id))continue;float x=-700+(k%6)*230,y=720+(k/6)*90;p.setColor(Color.rgb(224,181,64));c.drawRoundRect(x-22,y-30,x+22,y+14,7,7,p);p.setColor(Color.rgb(255,239,159));c.drawCircle(x,y-10,14,p);t.setTextSize(12);t.setColor(Color.WHITE);c.drawText(tr.name,x,y+32,t);k++;}}
+        private void drawPlacements(Canvas c){for(WorldPlacementManager.Placement q:WorldPlacementManager.all(a)){c.save();c.translate(q.x,q.y);c.rotate(q.rotation);c.scale(q.scale,q.scale);p.setColor(Color.rgb(196,151,82));c.drawRoundRect(-34,-25,34,25,8,8,p);c.restore();}}
+        private void drawPet(Canvas c){PetWorldAI.State s=PetWorldAI.tick(a,-700,700,-980,900);float x=s.x,y=s.y;String species=PetEvolutionManager.current(a).displayName.toLowerCase();if(species.contains("frog"))frog(c,x,y);else generic(c,x,y);t.setTextSize(20);t.setColor(Color.DKGRAY);c.drawText(PetEvolutionManager.name(a)+" • Lv "+PetEvolutionManager.current(a).level,x,y+88,t);}
+        private void frog(Canvas c,float x,float y){p.setColor(Color.rgb(76,164,70));c.drawOval(x-38,y-10,x+38,y+50,p);c.drawOval(x-34,y+38,x-12,y+72,p);c.drawOval(x+12,y+38,x+34,y+72,p);p.setColor(Color.rgb(93,190,80));c.drawCircle(x-24,y-18,17,p);c.drawCircle(x+24,y-18,17,p);p.setColor(Color.WHITE);c.drawCircle(x-24,y-19,8,p);c.drawCircle(x+24,y-19,8,p);p.setColor(Color.BLACK);c.drawCircle(x-24,y-19,4,p);c.drawCircle(x+24,y-19,4,p);}
+        private void generic(Canvas c,float x,float y){p.setColor(Color.rgb(181,139,94));c.drawOval(x-34,y-10,x+34,y+48,p);c.drawCircle(x,y-16,32,p);p.setColor(Color.rgb(65,45,35));c.drawCircle(x-11,y-18,4,p);c.drawCircle(x+11,y-18,4,p);}
+        @Override public boolean onTouchEvent(MotionEvent e){if(e.getPointerCount()==2){float d=dist(e);if(lastDist>0)zoom=Math.max(MIN,Math.min(MAX,zoom*d/lastDist));lastDist=d;return true;}lastDist=0;switch(e.getActionMasked()){case MotionEvent.ACTION_DOWN:lastX=downX=e.getX();lastY=downY=e.getY();moved=false;return true;case MotionEvent.ACTION_MOVE:float dx=e.getX()-lastX,dy=e.getY()-lastY;if(Math.abs(e.getX()-downX)>10||Math.abs(e.getY()-downY)>10)moved=true;ox+=dx;oy+=dy;lastX=e.getX();lastY=e.getY();invalidate();return true;case MotionEvent.ACTION_UP:if(!moved)tap(e.getX(),e.getY());return true;}return true;}
+        private float dist(MotionEvent e){float dx=e.getX(1)-e.getX(0),dy=e.getY(1)-e.getY(0);return (float)Math.sqrt(dx*dx+dy*dy);}
+        private void tap(float sx,float sy){float fit=Math.min(getWidth()/W,getHeight()/H)*zoom;float x=(sx-getWidth()/2f-ox)/fit,y=(sy-getHeight()/2f-oy)/fit;for(int i=0;i<b.length;i++)if(b[i]!=null&&b[i].contains(x,y)){buildingEvent(i);return;}if(Math.hypot(x-PetWorldAI.tick(a,-700,700,-980,900).x,y-PetWorldAI.tick(a,-700,700,-980,900).y)<110){petEvent();}}
+        private void buildingEvent(int i){String n=names[i];String msg;switch(i){case 0:msg="Home • Feed, play, hygiene, rest and daily pet care.";break;case 1:msg="Python Academy • Learn Python, complete a lesson, then take a healthy break.";break;case 2:msg="Market • Browse rewards and World items.";break;case 3:msg="Workshop • Build, place and improve your town.";break;case 4:msg="Park • Let your pet play and explore.";break;default:msg="Library • Study, review and build confidence.";}new AlertDialog.Builder(a).setTitle("🏠 "+n).setMessage(msg).setPositiveButton("Activity",(d,w)->invokeSafe(n)).setNegativeButton("Close",null).show();}
+        private void petEvent(){new AlertDialog.Builder(a).setTitle("🐾 "+PetEvolutionManager.name(a)).setMessage("Your pet is wandering independently. Let it explore, then care for it when its needs call for you.").setPositiveButton("OK",null).show();}
+        private void invokeSafe(String building){try{Class<?> c=Class.forName("com.odelly.pypet.BuildingEventManager");Method m=c.getMethod("handle",android.content.Context.class,String.class);m.invoke(null,a,building);}catch(Throwable ignored){try{PetCareSystem.tick(a);}catch(Throwable ignored2){}}}
+    }
+}
