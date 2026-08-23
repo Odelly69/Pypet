@@ -36,6 +36,18 @@ jobs:
         run: python -m pip install pytest
       - name: Run Python world and curriculum tests
         run: PYTHONPATH=app/src/main/python pytest app/src/test/python -q
+      - name: Verify real building activity routing
+        run: |
+          grep -q 'case "HOME": BuildingActivityView.home' app/src/main/java/com/odelly/pypet/BuildingEventManager.java
+          grep -q 'case "PYTHON ACADEMY": PypetAcademyActivityView.show' app/src/main/java/com/odelly/pypet/BuildingEventManager.java
+          grep -q 'case "MARKET": BuildingActivityView.market' app/src/main/java/com/odelly/pypet/BuildingEventManager.java
+          grep -q 'case "WORKSHOP": BuildingActivityView.workshop' app/src/main/java/com/odelly/pypet/BuildingEventManager.java
+          grep -q 'case "PARK": BuildingActivityView.park' app/src/main/java/com/odelly/pypet/BuildingEventManager.java
+          grep -q 'case "LIBRARY": BuildingActivityView.library' app/src/main/java/com/odelly/pypet/BuildingEventManager.java
+      - name: Verify no legacy building description popup
+        run: |
+          ! grep -q 'AlertDialog' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
+          ! grep -q 'AlertDialog' app/src/main/java/com/odelly/pypet/BuildingEventManager.java
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
       - name: Install Android SDK
@@ -63,4 +75,4 @@ jobs:
           name: pypet-android-release-unsigned-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
-# CI gate: every Android source/workflow change must produce verified APK artifacts.
+# CI gate: every Android source/workflow change must produce verified APK artifacts and prove that buildings route directly to real activities.
