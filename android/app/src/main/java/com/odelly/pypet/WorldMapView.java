@@ -62,7 +62,7 @@ public final class WorldMapView {
         WorldCanvas(Activity a){super(a);this.a=a;t.setTypeface(Typeface.DEFAULT_BOLD);setLayerType(View.LAYER_TYPE_SOFTWARE,null);placements.addAll(WorldPlacementManager.all(a));}
         void stop(){run=false;}
         void addPlacement(String id){float x=0,y=getHeight()*.18f; WorldPlacementManager.place(a,id,x,y,1f,0);placements.clear();placements.addAll(WorldPlacementManager.all(a));invalidate();}
-        @Override protected void onSizeChanged(int w,int h,int oldw,int oldh){super.onSizeChanged(w,h);invalidate();}
+        @Override protected void onSizeChanged(int w,int h,int oldw,int oldh){super.onSizeChanged(w,h,oldw,oldh);invalidate();}
         @Override protected void onDraw(Canvas c){float w=getWidth(),h=getHeight();c.drawColor(Color.rgb(139,203,230));c.save();c.translate(w/2+ox,h/2+oy);c.scale(zoom,zoom);drawTown(c,w/zoom,h/zoom);c.restore();if(run)postInvalidateDelayed(120);}
 
         private void drawTown(Canvas c,float w,float h){
