@@ -10,17 +10,27 @@ Pypet is an immersive Android virtual-pet game and structured Python-learning ac
 
 The educational curriculum is not replaced by gameplay. The curriculum remains structured: **teach -> demonstrate -> practice -> challenge -> apply -> master**. The world supplies motivation and authentic application.
 
-## 2. Pet body and life
+## 2. Pet body, active-pet lifecycle, and population
 
 Pets are full creatures rather than static faces. The production design must support a recognizable body, locomotion, posture, facial expression, eating, drinking, sleeping, bathing/showering, grooming, playing, exercising and environmental reactions. Species and evolutionary forms may differ in body proportions, appendages, markings and movement.
 
 Core care includes food, water, sleep, play, grooming, cleanliness, happiness, energy, hunger, health, routine and comfort. Food includes ingredients, prepared foods, snacks and drinks; the kitchen and bathroom are interactive world spaces rather than menu-only actions.
+
+**The player raises and works with exactly one active pet at a time.** Care, education, activities, needs, development and personal progression apply only to that active pet. Caring for Pet A must not refill or alter Pet B's personal hunger, health, happiness, care, lessons, or other pet-specific stats.
+
+When the active pet reaches an eligible growth/evolution milestone, the player earns an opportunity for a new egg. The previous pet is not replaced or deleted. It remains a living resident/history entry in the world. The player can then choose to begin raising the next egg as the new active pet.
+
+When a pet reaches its **final evolution**, it no longer requires care. It becomes a permanent mature world resident/companion: it can wander, socialize, play, explore, use appropriate world objects and playground equipment, and interact with other residents without hunger/cleanliness/sleep-care obligations.
+
+The long-term collection can therefore become large while only one pet is actively raised at any moment.
 
 ## 3. Immersive world
 
 The World is the primary gameplay surface. Home, kitchen, bathroom, bedroom, yard/garden, academy, library, workshop, market, park, hatchery, nature areas and future regions are represented as places or meaningful world landmarks. Objects should have purposes and interactions. Pets can move, react, explore and act autonomously.
 
 The world should feel lived-in: day/night, calm weather variation, NPC activity, discoveries, gardening, cooking, grooming, exploration, toys, decorations, keepsakes and persistent changes are preferred over isolated menu screens.
+
+All resident pets can coexist in the world and interact with one another. Social/world events may involve multiple pets, but personal care/development remains scoped to the active pet. A large accumulated population is a feature, not a requirement to manage every pet simultaneously.
 
 ## 4. Hidden lineage and evolution
 
@@ -60,9 +70,24 @@ Pypet is not a medical device and does not diagnose or treat mental-health condi
 
 Trophies recognize meaningful accomplishments across pet care, Python, exploration, projects, persistence and evolution. Streaks can reward consistency but must avoid harsh loss mechanics. Rewards should encourage returning and learning rather than fear of breaking a streak.
 
-## 10. Economy, rewarded ads and purchases
+## 10. World building, playground, economy, rewarded ads and purchases
 
-Normal gameplay provides meaningful progression. Pypet Coins and cosmetic world items can be earned through gameplay. Rewarded ads are optional and only accelerate the separate cosmetic reward economy. Core pets, the unicorn, Python lessons, care and required world areas are not ad-gated.
+The playground is a player-built persistent world area, not a finished park. Individual equipment and construction pieces are acquired and placed by the player.
+
+There are **four distinct acquisition families**:
+
+1. **Progression** — practical equipment unlocked through the existing balanced-development/world progression.
+2. **Earned** — distinctive items earned through Python mastery, projects, achievements, exploration, trophies, pet milestones and other gameplay accomplishments.
+3. **Purchase** — optional premium/customizable equipment purchased with normal in-game currency.
+4. **Rewarded ad** — optional exclusive novelty equipment/items obtained through the separate rewarded-ad currency.
+
+The four routes intentionally contain different item families; they are not interchangeable copies of the same catalog. No route is required for core Python education or core pet care.
+
+The playground catalog includes standard swings, a **separate vintage rigid-arm pump swing inspired by older mechanical playground equipment**, slides, seesaws, merry-go-rounds/spinners, spring riders, climbing structures, overhead equipment, towers, nature-play features, benches and future accessibility/nature equipment. Each item has an original Pypet visual concept and calm interaction choreography appropriate to the equipment.
+
+Equipment animation must include appropriate approach, entry/mount, activity, pause, slowdown, exit/dismount and social variants where applicable. The pump swing is a rigid-arm mechanical swing with grip, pumping, coasting and controlled slowdown; it is not a water pump and is distinct from a normal chain swing.
+
+Normal gameplay provides meaningful progression. Pypet Coins and cosmetic world items can be earned through gameplay. Rewarded ads are optional and only accelerate the separate cosmetic reward economy. Core pets, Python lessons, care and required world areas are not ad-gated.
 
 Google Play purchases remain fail-closed until trusted HTTPS verification is configured. Purchase verification must validate package name, product allowlist and Play purchase state before granting ownership.
 
@@ -70,11 +95,13 @@ Google Play purchases remain fail-closed until trusted HTTPS verification is con
 
 Presentation remains calm by design: no intentional strobing, rapid flashing, screen shaking or reward haptics. Reduced-motion and audio controls remain available. Safety features are risk-reduction design and are not a medical guarantee.
 
+Playground animations specifically avoid flashing/strobing and uncontrolled rapid camera motion. Spinners, swings and other motion equipment use controlled, slow cycles and honor reduced-motion settings.
+
 ## 12. Production interface rule
 
 Developer/debug controls are development-only. The production/release build must present only the player-facing game, learning, world, care, collection, achievements, rewards, accessibility and account/purchase surfaces. No developer debug panel, debug practice runner, developer trophy button, developer treasure button or debug reward controls may be visible in the release UI.
 
-The current Android activity already guards its developer controls with `BuildConfig.DEBUG`; this rule must remain enforced as production UI evolves.
+The current Android activity guards its developer controls with `BuildConfig.DEBUG`; this rule must remain enforced as production UI evolves.
 
 ## 13. Release acceptance
 
@@ -85,12 +112,19 @@ A release candidate is not considered complete until:
 - The APK is verified and uploaded by CI.
 - Production UI contains no developer/debug controls.
 - Core world navigation works.
-- Pet care works.
+- Full pet body/animation systems are present for supported forms.
+- Exactly one pet is the active care/learning pet at a time.
+- Growth/evolution grants the next egg opportunity without deleting the previous pet.
+- Final-evolution pets no longer require care and remain world residents.
 - Pet collection/past-pet history works.
+- Multiple resident pets can interact in the world.
 - Evolution remains multi-generational and lineage-hidden.
 - The structured Python academy remains intact.
 - Job-readiness/capstone progression remains accessible.
 - Trophies and streaks work.
+- Playground is player-built from individually acquired items.
+- Playground acquisition distinguishes progression, earned, purchase and rewarded-ad item families.
+- Playground interaction animations are calm and safety-guarded.
 - Rewarded-ad behavior remains optional and nonessential.
 - Purchase verification remains fail-closed.
 - Sensory-safety guardrails remain enabled.
