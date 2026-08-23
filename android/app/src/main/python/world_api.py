@@ -22,6 +22,11 @@ def care(pet, action="feed"):
     return care_pet(pet, action)
 
 
+def place_exclusive_item(item_id, location="home"):
+    """Place an owned exclusive decoration into the simulated world."""
+    return world.add_world_item(item_id, location)
+
+
 def advance(hours=1):
     world.tick(hours)
     return world.status()
