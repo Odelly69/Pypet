@@ -3,134 +3,47 @@ package com.odelly.pypet;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import com.android.billingclient.api.*;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import org.json.*;
 
-import com.android.billingclient.api.AcknowledgePurchaseParams;
-import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.BillingClientStateListener;
-import com.android.billingclient.api.BillingFlowParams;
-import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.ProductDetails;
-import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.QueryProductDetailsParams;
-import com.android.billingclient.api.QueryPurchasesParams;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-/**
- * Client-side Google Play Billing integration for one-time Treasure purchases.
- * Production should additionally validate purchase tokens on a trusted backend
- * before granting valuable content. No ad or Play purchase is used to gate lessons.
- */
+/** Google Play Billing client. Production entitlement is granted only after backend verification. */
 public final class TreasurePurchaseManager implements BillingClient.PurchasesUpdatedListener {
-    public interface Listener {
-        void onProductsReady(List<ProductDetails> products);
-        void onPurchaseGranted(String productId);
-        void onMessage(String message);
+    public interface Listener { void onProductsReady(List<ProductDetails> products); void onPurchaseGranted(String productId); void onMessage(String message); }
+    private static final String PREFS="pypet_treasure_purchases";
+    private final BillingClient billing; private final SharedPreferences prefs; private final Map<String,ProductDetails> products=new HashMap<>(); private Listener listener;
+    private final String verifyUrl;
+
+    public TreasurePurchaseManager(Context context){
+        prefs=context.getSharedPreferences(PREFS,Context.MODE_PRIVATE);
+        verifyUrl=context.getString(com.odelly.pypet.R.string.purchase_verification_url);
+        billing=BillingClient.newBuilder(context).enablePendingPurchases().setListener(this).build();
     }
-
-    private static final String PREFS = "pypet_treasure_purchases";
-    private final BillingClient billing;
-    private final SharedPreferences prefs;
-    private final Map<String, ProductDetails> products = new HashMap<>();
-    private Listener listener;
-
-    public TreasurePurchaseManager(Context context) {
-        prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        billing = BillingClient.newBuilder(context)
-                .enablePendingPurchases()
-                .setListener(this)
-                .build();
+    public void connect(Listener l){listener=l;if(billing.isReady()){queryProducts();return;}billing.startConnection(new BillingClientStateListener(){
+        public void onBillingSetupFinished(BillingResult r){if(r.getResponseCode()==BillingClient.BillingResponseCode.OK)queryProducts();else message("Google Play Billing unavailable: "+r.getDebugMessage());}
+        public void onBillingServiceDisconnected(){message("Google Play Billing disconnected. Try the store again.");}
+    });}
+    private void queryProducts(){List<QueryProductDetailsParams.Product> ids=new ArrayList<>();for(TreasureCatalog.Item i:TreasureCatalog.all())ids.add(QueryProductDetailsParams.Product.newBuilder().setProductId(i.productId).setProductType(BillingClient.ProductType.INAPP).build());
+        billing.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(ids).build(),(r,d)->{if(r.getResponseCode()!=BillingClient.BillingResponseCode.OK){message("Could not load Treasure Trove: "+r.getDebugMessage());return;}products.clear();for(ProductDetails p:d.getProductDetailsList())products.put(p.getProductId(),p);if(listener!=null)listener.onProductsReady(new ArrayList<>(products.values()));restorePurchases();});}
+    public void buy(Activity a,String id){ProductDetails d=products.get(id);if(d==null){message("That Treasure is not currently available.");return;}BillingFlowParams.ProductDetailsParams p=BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(d).build();BillingResult r=billing.launchBillingFlow(a,BillingFlowParams.newBuilder().setProductDetailsParamsList(Collections.singletonList(p)).build());if(r.getResponseCode()!=BillingClient.BillingResponseCode.OK)message("Google Play could not start the purchase: "+r.getDebugMessage());}
+    public void restorePurchases(){if(!billing.isReady())return;billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(),(r,ps)->{if(r.getResponseCode()==BillingClient.BillingResponseCode.OK&&ps!=null)for(Purchase p:ps)handlePurchase(p);});}
+    public void onPurchasesUpdated(BillingResult r,List<Purchase> ps){if(r.getResponseCode()==BillingClient.BillingResponseCode.OK&&ps!=null)for(Purchase p:ps)handlePurchase(p);else if(r.getResponseCode()!=BillingClient.BillingResponseCode.USER_CANCELED)message("Purchase was not completed: "+r.getDebugMessage());}
+    private void handlePurchase(Purchase p){if(p.getPurchaseState()!=Purchase.PurchaseState.PURCHASED){if(p.getPurchaseState()==Purchase.PurchaseState.PENDING)message("Purchase pending. Google Play will notify us when it completes.");return;}for(String id:p.getProducts())verifyThenGrant(p,id);}
+    private void verifyThenGrant(Purchase p,String id){
+        new AsyncTask<Void,Void,Boolean>(){protected Boolean doInBackground(Void...v){try{return verify(p,id);}catch(Exception e){return false;}}
+            protected void onPostExecute(Boolean ok){if(!ok){message("We couldn't verify that purchase yet. Your Treasure has not been granted; please try Restore Purchases later.");return;}grant(id);if(!p.isAcknowledged())billing.acknowledgePurchase(AcknowledgePurchaseParams.newBuilder().setPurchaseToken(p.getPurchaseToken()).build(),r->{if(r.getResponseCode()!=BillingClient.BillingResponseCode.OK)message("Purchase acknowledgement will be retried.");});}}
+        }.execute();
     }
-
-    public void connect(Listener listener) {
-        this.listener = listener;
-        if (billing.isReady()) { queryProducts(); return; }
-        billing.startConnection(new BillingClientStateListener() {
-            @Override public void onBillingSetupFinished(BillingResult result) {
-                if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) queryProducts();
-                else message("Google Play Billing unavailable: " + result.getDebugMessage());
-            }
-            @Override public void onBillingServiceDisconnected() {
-                message("Google Play Billing disconnected. It will retry when the store is opened again.");
-            }
-        });
+    private boolean verify(Purchase p,String id)throws Exception{
+        if(verifyUrl==null||verifyUrl.trim().isEmpty())return false;
+        HttpURLConnection c=(HttpURLConnection)new URL(verifyUrl).openConnection();c.setRequestMethod("POST");c.setConnectTimeout(8000);c.setReadTimeout(10000);c.setDoOutput(true);c.setRequestProperty("Content-Type","application/json");
+        JSONObject body=new JSONObject();body.put("packageName","com.odelly.pypet");body.put("productId",id);body.put("purchaseToken",p.getPurchaseToken());
+        try(OutputStream out=c.getOutputStream()){out.write(body.toString().getBytes("UTF-8"));}
+        if(c.getResponseCode()!=200)return false;try(InputStream in=c.getInputStream()){String s=new BufferedReader(new InputStreamReader(in)).lines().reduce("",(a,b)->a+b);JSONObject result=new JSONObject(s);return result.optBoolean("verified",false)&&id.equals(result.optString("productId"));}
     }
-
-    private void queryProducts() {
-        List<QueryProductDetailsParams.Product> ids = new ArrayList<>();
-        for (TreasureCatalog.Item item : TreasureCatalog.all()) {
-            ids.add(QueryProductDetailsParams.Product.newBuilder()
-                    .setProductId(item.productId)
-                    .setProductType(BillingClient.ProductType.INAPP)
-                    .build());
-        }
-        billing.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(ids).build(), (result, details) -> {
-            if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-                message("Could not load Treasure Trove: " + result.getDebugMessage()); return;
-            }
-            products.clear();
-            for (ProductDetails d : details.getProductDetailsList()) products.put(d.getProductId(), d);
-            if (listener != null) listener.onProductsReady(new ArrayList<>(products.values()));
-            restorePurchases();
-        });
-    }
-
-    public void buy(Activity activity, String productId) {
-        ProductDetails details = products.get(productId);
-        if (details == null) { message("That Treasure is not currently available from Google Play."); return; }
-        BillingFlowParams.ProductDetailsParams params = BillingFlowParams.ProductDetailsParams.newBuilder()
-                .setProductDetails(details).build();
-        BillingResult result = billing.launchBillingFlow(activity,
-                BillingFlowParams.newBuilder().setProductDetailsParamsList(java.util.Collections.singletonList(params)).build());
-        if (result.getResponseCode() != BillingClient.BillingResponseCode.OK)
-            message("Google Play could not start the purchase: " + result.getDebugMessage());
-    }
-
-    public void restorePurchases() {
-        if (!billing.isReady()) return;
-        billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder()
-                .setProductType(BillingClient.ProductType.INAPP).build(), (result, purchases) -> {
-            if (result.getResponseCode() == BillingClient.BillingResponseCode.OK)
-                for (Purchase p : purchases) handlePurchase(p);
-        });
-    }
-
-    @Override public void onPurchasesUpdated(BillingResult result, List<Purchase> purchases) {
-        if (result.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
-            for (Purchase p : purchases) handlePurchase(p);
-        } else if (result.getResponseCode() != BillingClient.BillingResponseCode.USER_CANCELED) {
-            message("Purchase was not completed: " + result.getDebugMessage());
-        }
-    }
-
-    private void handlePurchase(Purchase purchase) {
-        if (purchase.getPurchaseState() != Purchase.PurchaseState.PURCHASED) {
-            if (purchase.getPurchaseState() == Purchase.PurchaseState.PENDING) message("Purchase pending. Google Play will notify us when it completes.");
-            return;
-        }
-        for (String productId : purchase.getProducts()) {
-            // Local idempotency prevents duplicate grants after restoration. A backend should
-            // perform authoritative token verification before production entitlement delivery.
-            if (!prefs.getBoolean(productId, false)) {
-                prefs.edit().putBoolean(productId, true).apply();
-                if (listener != null) listener.onPurchaseGranted(productId);
-            }
-        }
-        if (!purchase.isAcknowledged()) {
-            billing.acknowledgePurchase(AcknowledgePurchaseParams.newBuilder()
-                    .setPurchaseToken(purchase.getPurchaseToken()).build(), result -> {
-                        if (result.getResponseCode() != BillingClient.BillingResponseCode.OK)
-                            message("Purchase acknowledgement will be retried.");
-                    });
-        }
-    }
-
-    public boolean owns(String productId) { return prefs.getBoolean(productId, false); }
-
-    private void message(String text) { if (listener != null) listener.onMessage(text); }
+    private void grant(String id){if(!prefs.getBoolean(id,false)){prefs.edit().putBoolean(id,true).apply();if(listener!=null)listener.onPurchaseGranted(id);}}
+    public boolean owns(String id){return prefs.getBoolean(id,false);}private void message(String s){if(listener!=null)listener.onMessage(s);}
 }
