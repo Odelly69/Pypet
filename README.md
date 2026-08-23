@@ -1,6 +1,8 @@
-# Pypet
+# PyPet
 
-Pypet is a multi-pet, learn-by-doing Python academy for Android. It is a standalone project and is **not** part of the separate `Chat-gpt-epilepsy-filters` repository.
+PyPet is a multi-pet, learn-by-doing Python academy for Android. The product name is intentionally styled **PyPet** as a programmer joke: Python + Pet, with the capitalization resembling a familiar programming identifier while remaining a friendly game name.
+
+PyPet is a standalone project and is **not** part of the separate `Chat-gpt-epilepsy-filters` repository.
 
 ## Core idea
 
@@ -14,9 +16,9 @@ The Android world includes a persistent multi-pet collection, hatchery, lineage-
 
 ## Calm presentation: animation and sound
 
-Pypet now includes gentle, non-flashing pet animation and an original synthesized happy background tune. Feeding, playing, learning, lesson completion, rewards and purchases can use short, quiet interaction tones. Music is user-toggleable and stops when the app is paused. Audio is deliberately low-volume and avoids abrupt/loud effects. There is no intentional strobing, screen shaking, or reward haptics.
+PyPet includes gentle, non-flashing pet animation and an original synthesized happy background tune. Feeding, playing, learning, lesson completion, rewards and purchases can use short, quiet interaction tones. Music is user-toggleable and stops when the app is paused. Audio is deliberately low-volume and avoids abrupt/loud effects. There is no intentional strobing, screen shaking, or reward haptics.
 
-Animation and audio are presentation features, not medical protection. Pypet is not a medical device and cannot guarantee seizure prevention.
+Animation and audio are presentation features, not medical protection. PyPet is not a medical device and cannot guarantee seizure prevention.
 
 ## Curriculum scope
 
@@ -28,13 +30,13 @@ The expanded job-readiness path incorporates the earlier curriculum and adds pra
 
 ## Pets
 
-Pypet supports a catalog model rather than a single character. The initial catalog includes dogs, cats, foxes, rabbits, dragons, owls, robots, axolotls, penguins and dinosaurs. A unicorn is a guaranteed core pet and is never an ad-gated reward. Pets have species, names, personalities, needs, inventory, knowledge and XP, and their behavior can be driven by learner-written Python.
+PyPet supports a catalog model rather than a single character. The initial catalog includes dogs, cats, foxes, rabbits, dragons, owls, robots, axolotls, penguins and dinosaurs. A unicorn is a guaranteed core pet and is never an ad-gated reward. Pets have species, names, personalities, needs, inventory, knowledge and XP, and their behavior can be driven by learner-written Python.
 
 ## Reward Center and optional sponsored items
 
-The Reward Center contains optional, non-transferable exclusive world decorations. The Android reward catalog currently contains **40 original decorations**, including the core coin collection and a dedicated ad-accelerated collection. Rewarded ads are optional and explicitly opted into one at a time. Ads only provide an accelerated way to earn Pypet Coins for these exclusive decorations; they do not gate Python lessons, pet care, ordinary pets, the unicorn, required world areas or saved progress. Rewards are non-transferable and remain inside Pypet.
+The Reward Center contains optional, non-transferable exclusive world decorations. The Android reward catalog currently contains **40 original decorations**, including the core coin collection and a dedicated ad-accelerated collection. Rewarded ads are optional and explicitly opted into one at a time. Ads only provide an accelerated way to earn PyPet Coins for these exclusive decorations; they do not gate Python lessons, pet care, ordinary pets, the unicorn, required world areas or saved progress. Rewards are non-transferable and remain inside PyPet.
 
-Development/debug builds use Google's rewarded-ad test unit. Release builds use the configured production rewarded-ad unit. A completed rewarded ad grants 25 Pypet Coins, which the learner can spend on exclusive items.
+Development/debug builds use Google's rewarded-ad test unit. Release builds use the configured production rewarded-ad unit. A completed rewarded ad grants 25 PyPet Coins, which the learner can spend on exclusive items.
 
 ## Google Play purchases
 
@@ -48,6 +50,10 @@ Pet presentation is deliberately calm: no intentional strobing, screen shaking o
 
 ## Android
 
-The Android application lives under `android/`. It embeds Python 3.13 with Chaquopy and has a GitHub Actions workflow which runs the Python tests, builds the debug APK, verifies that the APK exists, and uploads it as an Actions artifact. The current beta build is `0.1.0-beta5` / version code `6`.
+The Android application lives under `android/`. It embeds Python 3.13 with Chaquopy and has a GitHub Actions workflow which runs the Python tests, builds the debug APK, verifies that the APK exists, builds the production release APK, verifies it, and uploads both APK artifacts. The current beta build is `0.1.0-beta5` / version code `6`.
 
-The Academy Java/Python bridge uses Chaquopy `PyObject`; Android CI must build from the current `main` commit rather than the earlier stale failing build.
+The Academy Java/Python bridge uses Chaquopy `PyObject`; Android CI must build from the current `main` commit rather than an earlier stale failing build.
+
+## Product naming convention
+
+**PyPet** is the user-facing product name. Source packages and Java identifiers remain lowercase/camel/Pascal case as required by their programming languages; this preserves conventional code style while keeping the product's intentional **PyPet** branding visible to players.
