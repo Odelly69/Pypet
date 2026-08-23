@@ -46,6 +46,7 @@ jobs:
           gradle-version: '8.11.1'
       - name: Generate Gradle wrapper
         run: gradle wrapper --gradle-version 8.11.1
+      # Production gate: compile before any APK verification/upload.
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
       - name: Verify APK
