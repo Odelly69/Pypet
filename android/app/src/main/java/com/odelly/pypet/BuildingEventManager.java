@@ -12,7 +12,7 @@ public final class BuildingEventManager {
         try{
             switch(building){
                 case "HOME": BuildingActivityView.home(a); break;
-                case "PYTHON ACADEMY": PypetSchoolView.show(a); break;
+                case "PYTHON ACADEMY": PypetAcademyActivityView.show(a); break;
                 case "MARKET": BuildingActivityView.market(a); break;
                 case "WORKSHOP": BuildingActivityView.workshop(a); break;
                 case "PARK": BuildingActivityView.park(a); break;
