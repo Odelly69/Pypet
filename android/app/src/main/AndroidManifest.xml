@@ -4,6 +4,9 @@
         android:label="Pypet Python Academy"
         android:allowBackup="false"
         android:supportsRtl="true">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3352973554477677~1000449378" />
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
