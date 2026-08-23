@@ -1,19 +1,9 @@
-"""Canonical Pypet job-readiness and graduation curriculum.
-
-Job readiness incorporates every earlier course requirement. Graduation is
-competency based: learners demonstrate skills, build, test, debug, explain,
-and ship projects. It prepares learners for real-world work but does not
-promise employment.
-"""
+"""Canonical Pypet job-readiness curriculum and hands-on lesson API."""
 from dataclasses import dataclass, asdict
 
 @dataclass(frozen=True)
 class CareerLesson:
-    id: str
-    stage: str
-    title: str
-    skill: str
-    project: str
+    id: str; stage: str; title: str; skill: str; project: str
 
 LESSONS = [
     CareerLesson('career-01','Foundation','Professional Python Workflow','Git, branches, commits, issues, environments','Maintain a project from issue to tested commit.'),
@@ -45,49 +35,44 @@ LESSONS = [
 ]
 
 ROLE_SKILLS = {
-    'Python Developer': ['full Python','standard library','testing','Git','databases','APIs','deployment'],
-    'Automation Developer': ['Python','files','CLI','APIs','concurrency','testing','security'],
-    'QA/Test Automation': ['Python','testing','debugging','CI','APIs','automation'],
-    'Game/Interactive Developer': ['Python','Pygame','2D graphics','animation','3D graphics','optimization'],
-    'GUI Developer': ['Python','Tkinter','event-driven programming','testing','packaging'],
-    'Junior Software Engineer': ['full Python','standard library','algorithms','data structures','Git','testing','architecture'],
+    'Python Developer':['full Python','standard library','testing','Git','databases','APIs','deployment'],
+    'Automation Developer':['Python','files','CLI','APIs','concurrency','testing','security'],
+    'QA/Test Automation':['Python','testing','debugging','CI','APIs','automation'],
+    'Game/Interactive Developer':['Python','Pygame','2D graphics','animation','3D graphics','optimization'],
+    'GUI Developer':['Python','Tkinter','event-driven programming','testing','packaging'],
+    'Junior Software Engineer':['full Python','standard library','algorithms','data structures','Git','testing','architecture'],
 }
+REQUIRED_MODULE_DOMAINS = ['builtins','collections','itertools','functools','operator','math','statistics','decimal','fractions','random','datetime','zoneinfo','calendar','time','pathlib','os','shutil','glob','tempfile','json','csv','configparser','sqlite3','re','string','textwrap','difflib','enum','dataclasses','typing','abc','contextlib','logging','traceback','warnings','unittest','doctest','argparse','subprocess','threading','multiprocessing','concurrent.futures','asyncio','queue','socket','http','urllib','email','xml','html','hashlib','hmac','secrets','base64','struct','pickle','shelve','cProfile','tkinter','pygame']
 
-REQUIRED_MODULE_DOMAINS = [
-    'builtins','collections','itertools','functools','operator','math','statistics','decimal','fractions','random',
-    'datetime','zoneinfo','calendar','time','pathlib','os','shutil','glob','tempfile','json','csv','configparser',
-    'sqlite3','re','string','textwrap','difflib','enum','dataclasses','typing','abc','contextlib','logging','traceback',
-    'warnings','unittest','doctest','argparse','subprocess','threading','multiprocessing','concurrent.futures',
-    'asyncio','queue','socket','http','urllib','email','xml','html','hashlib','hmac','secrets','base64','struct',
-    'pickle','shelve','cProfile','tkinter','pygame',
-]
+# The World uses this API for learn-by-doing missions. The lesson is an
+# actionable task, not a passive reading card; the learner must write/run/
+# debug code in the Academy Lab before progression is awarded.
+LESSON_TASKS = {
+    'career-01': ('Fix the project workflow', 'Create a branch, make a clean commit, and explain the change.'),
+    'career-02': ('Refactor a World feature', 'Improve the supplied code without changing its behavior; run the tests.'),
+    'career-03': ('Repair the failing tests', 'Write or repair tests until the complete suite passes.'),
+    'career-04': ('Hunt the bug', 'Reproduce the defect, isolate it, patch it, and prove the fix.'),
+    'career-13': ('Program your pet', 'Write Python that changes your pet\'s behavior, run it, observe the result, and iterate.'),
+    'career-14': ('Choose the right module', 'Solve a World task using an appropriate standard-library module and justify the choice.'),
+    'career-15': ('Map the World', 'Convert a logical target point to screen coordinates at multiple resolutions.'),
+    'career-16': ('Animate the pet', 'Implement timed movement with interpolation; observe and tune the result.'),
+    'career-17': ('Build a 3D object', 'Transform, position, and animate a 3D object while explaining camera coordinates.'),
+    'career-18': ('Build a GUI', 'Create a functional Tkinter interface with events and validation.'),
+    'career-19': ('Build a game', 'Create a playable Pygame loop with input, collision, scoring, and timing.'),
+    'career-26': ('Ship your capstone', 'Implement requirements, tests, documentation, release build, and a technical defense.'),
+}
 
 def curriculum(): return [asdict(x) for x in LESSONS]
 def total_lessons(): return len(LESSONS)
 def role_skills(): return ROLE_SKILLS
 def required_modules(): return REQUIRED_MODULE_DOMAINS
 
+def current_lesson(index=0):
+    lesson = LESSONS[max(0, min(int(index), len(LESSONS)-1))]
+    title, task = LESSON_TASKS.get(lesson.id, (lesson.title, lesson.project))
+    return {'id':lesson.id,'stage':lesson.stage,'title':title,'skill':lesson.skill,'project':lesson.project,'task':task,'hands_on':True}
+
+def lesson_task(index=0): return current_lesson(index)['task']
+
 def mastery_requirements():
-    return {
-        'all_previous_curricula': True,
-        'full_python_language': True,
-        'standard_library_module_breadth': True,
-        '2d_graphics': True,
-        'coordinate_resolution_mapping': True,
-        'animation': True,
-        '3d_graphics': True,
-        'tkinter': True,
-        'pygame': True,
-        'algorithms_data_structures': True,
-        'testing_debugging': True,
-        'git_code_review': True,
-        'apis_databases': True,
-        'security': True,
-        'deployment_ci': True,
-        'portfolio_projects': 4,
-        'technical_interview': True,
-        'take_home_project': True,
-        'capstone': True,
-        'confidence_from_demonstrated_competency': True,
-        'employment_guarantee': False,
-    }
+    return {'all_previous_curricula':True,'full_python_language':True,'standard_library_module_breadth':True,'2d_graphics':True,'coordinate_resolution_mapping':True,'animation':True,'3d_graphics':True,'tkinter':True,'pygame':True,'algorithms_data_structures':True,'testing_debugging':True,'git_code_review':True,'apis_databases':True,'security':True,'deployment_ci':True,'portfolio_projects':4,'technical_interview':True,'take_home_project':True,'capstone':True,'confidence_from_demonstrated_competency':True,'employment_guarantee':False}
