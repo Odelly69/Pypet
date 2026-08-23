@@ -6,18 +6,90 @@ import android.graphics.Color;
 import android.view.Gravity;
 import android.widget.*;
 
-/** School is a world location: the user plays Python lessons and that progress develops the pet/world. */
+/**
+ * Academy is a World location. The user learns by doing; demonstrated user
+ * progress is the pet's learning and unlocks World development.
+ */
 public final class PypetSchoolView {
-    private PypetSchoolView(){}
-    public static void show(Activity a){
+    private PypetSchoolView() {}
+
+    public static void show(Activity a) {
         PetEvolutionManager.attendSchool(a);
-        LinearLayout root=new LinearLayout(a);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(26,22,26,22);root.setGravity(Gravity.CENTER_HORIZONTAL);
-        TextView title=new TextView(a);title.setText("🏫 Pypet Academy");title.setTextSize(29);title.setTextColor(Color.DKGRAY);root.addView(title);
-        TextView intro=new TextView(a);intro.setText("🎒 "+PetEvolutionManager.name(a)+" is in class!\n\nYour Python learning game is the lesson. What you learn becomes part of your pet's education and unlocks new world development.");intro.setTextSize(18);intro.setGravity(Gravity.CENTER);root.addView(intro);
-        TextView progress=new TextView(a);progress.setText("🏫 School progress: "+PetEvolutionManager.school(a)+"\n🐍 Python lessons: "+PetEvolutionManager.lessons(a)+"\n⭐ Balanced development: "+PetEvolutionManager.balancedDevelopmentScore(a)+"%");progress.setGravity(Gravity.CENTER);progress.setTextSize(18);root.addView(progress);
-        EditText code=new EditText(a);code.setGravity(Gravity.TOP|Gravity.START);code.setHint("Today's challenge\nExample: answer = 2 + 3\nprint(answer)");code.setMinLines(6);root.addView(code);
-        Button lesson=new Button(a);lesson.setText("🐍 Start Python Lesson");root.addView(lesson);lesson.setOnClickListener(v->{try{String result=com.chaquo.python.Python.getInstance().getModule("pypet_engine").callAttr("run_lesson",code.getText().toString()).toString();PetEvolutionManager.completeLesson(a);new AlertDialog.Builder(a).setTitle("🎓 Class complete!").setMessage(result+"\n\n🐾 "+PetEvolutionManager.name(a)+" learned with you.\n🧠 Learning progress: "+PetEvolutionManager.lessons(a)+" lessons\n🌎 World development progress: "+PetEvolutionManager.balancedDevelopmentScore(a)+"%").setPositiveButton("Back to world",null).show();}catch(Exception e){new AlertDialog.Builder(a).setTitle("Keep practicing").setMessage("That lesson needs another try. Your pet is cheering you on!\n\n"+e.getMessage()).setPositiveButton("Try again",null).show();}});
-        TextView world=new TextView(a);world.setText("\n🏗️ World development\nLearning unlocks world capabilities progressively: basic commands → building tools → interactive systems → automation → advanced projects. The school game is the gateway to developing your world.");world.setTextSize(17);root.addView(world);
-        new AlertDialog.Builder(a).setView(root).setNegativeButton("Leave school",null).show();
+        final LinearLayout root = new LinearLayout(a);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(26, 22, 26, 22);
+        root.setGravity(Gravity.CENTER_HORIZONTAL);
+
+        TextView title = new TextView(a);
+        title.setText("🏫 PYPET ACADEMY — LEARN BY DOING");
+        title.setTextSize(24);
+        title.setTextColor(Color.DKGRAY);
+        root.addView(title);
+
+        TextView intro = new TextView(a);
+        intro.setText("You learn it. Your pet learns it. Your World grows from it.\n\nNo passive lessons: solve the mission, run your code, observe the result, fix mistakes, and try again.");
+        intro.setTextSize(17);
+        intro.setGravity(Gravity.CENTER);
+        root.addView(intro);
+
+        TextView mission = new TextView(a);
+        mission.setTextSize(18);
+        mission.setGravity(Gravity.CENTER);
+        root.addView(mission);
+
+        EditText code = new EditText(a);
+        code.setGravity(Gravity.TOP | Gravity.START);
+        code.setHint("Write Python here...\nExample:\nanswer = 2 + 3\nprint(answer)");
+        code.setMinLines(8);
+        root.addView(code);
+
+        TextView result = new TextView(a);
+        result.setTextSize(16);
+        root.addView(result);
+
+        Button run = new Button(a);
+        run.setText("▶ RUN PYTHON — TEST YOUR IDEA");
+        root.addView(run);
+
+        try {
+            Object py = com.chaquo.python.Python.getInstance().getModule("pypet_engine");
+            int lessonIndex = PetEvolutionManager.lessons(a);
+            String lesson = py.callAttr("current_lesson", lessonIndex).toString();
+            mission.setText("🎯 Your next mission\n" + lesson + "\n\nComplete the task yourself. Successful code becomes your pet's knowledge.");
+        } catch (Exception e) {
+            mission.setText("🎯 Your next Python mission\nSolve a small problem for your pet, then run your code.");
+        }
+
+        run.setOnClickListener(v -> {
+            String source = code.getText().toString().trim();
+            if (source.isEmpty()) {
+                result.setText("✏️ Write and run your own Python solution first.");
+                return;
+            }
+            try {
+                Object py = com.chaquo.python.Python.getInstance().getModule("pypet_engine");
+                String output = py.callAttr("run_lesson", source).toString();
+                result.setText("🧪 Result\n" + output);
+                // A lesson is credited only after code executes successfully.
+                if (output.contains("'ok': True") && output.contains("'passed': True")) {
+                    PetEvolutionManager.completeLesson(a);
+                    new AlertDialog.Builder(a)
+                        .setTitle("🎓 Skill learned!")
+                        .setMessage("You demonstrated the skill.\n\n🐾 " + PetEvolutionManager.name(a) + " learned it with you.\n🧠 Python mastery: " + PetEvolutionManager.lessons(a) + " lessons\n🌎 World development: " + PetEvolutionManager.balancedDevelopmentScore(a) + "%")
+                        .setPositiveButton("Continue exploring", null).show();
+                } else {
+                    result.append("\n\n💡 Not mastered yet. Experiment, read the error, change your code, and run it again.");
+                }
+            } catch (Exception e) {
+                result.setText("Keep experimenting.\n" + e.getMessage());
+            }
+        });
+
+        TextView curriculum = new TextView(a);
+        curriculum.setText("\n📚 PATH: Novice → Apprentice → Intermediate → Advanced → Expert → Master\n🐍 Python language + standard library + Tkinter + Pygame + real projects\n\nEvery successful skill advances the same learning state used by your pet and World.");
+        curriculum.setTextSize(16);
+        root.addView(curriculum);
+
+        new AlertDialog.Builder(a).setView(root).setNegativeButton("Return to World", null).show();
     }
 }
