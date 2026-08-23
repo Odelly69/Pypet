@@ -1,4 +1,5 @@
 <resources>
-    <!-- Configure the real HTTPS verifier URL for production. Empty means purchases fail closed. -->
+    <!-- Production: supply the trusted HTTPS purchase-verifier URL through the release configuration process. -->
+    <!-- Deliberately empty in source control so builds fail closed until verification is configured. -->
     <string name="purchase_verification_url"></string>
 </resources>
