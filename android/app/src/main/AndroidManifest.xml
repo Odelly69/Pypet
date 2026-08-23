@@ -1,14 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
-
     <application
         android:theme="@style/AppTheme"
         android:label="Pypet Python Academy"
+        android:icon="@drawable/ic_pypet"
+        android:roundIcon="@drawable/ic_pypet"
         android:allowBackup="false"
         android:supportsRtl="true">
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3352973554477677~1000449378" />
+        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3352973554477677~1000449378" />
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
