@@ -8,6 +8,12 @@ import android.widget.*;
 /** Player profile, avatar identity, and player-created town setup. */
 public final class PypetProfileView {
     private PypetProfileView() {}
+
+    /** Convenience entry point used by MainActivity. */
+    public static void show(Activity a) {
+        show(a, !PypetProfileManager.complete(a), a::recreate);
+    }
+
     public static void show(Activity a, boolean firstRun, Runnable afterSave){
         LinearLayout root=new LinearLayout(a); root.setOrientation(LinearLayout.VERTICAL); root.setPadding(28,22,28,22);
         TextView title=new TextView(a); title.setText(firstRun?"🐾 CREATE YOUR PYPET WORLD":"👤 PYPET PROFILE"); title.setTextSize(25); title.setTextColor(Color.DKGRAY); title.setGravity(Gravity.CENTER); root.addView(title);
