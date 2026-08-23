@@ -11,12 +11,26 @@ android {
         applicationId 'com.odelly.pypet'
         minSdk 24
         targetSdk 35
-        versionCode 5
-        versionName '0.1.0-beta4'
+        versionCode 6
+        versionName '0.1.0-beta5'
 
         // Chaquopy requires explicit native ABIs.
         ndk {
             abiFilters 'arm64-v8a', 'x86_64'
+        }
+
+        // Release verification endpoint is supplied by the release environment.
+        // Debug builds intentionally default to empty and fail closed for purchases.
+        buildConfigField 'String', 'PURCHASE_VERIFICATION_URL', '"' + (project.findProperty('pypetPurchaseVerifyUrl') ?: '') + '"'
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField 'String', 'REWARDED_AD_UNIT_ID', '"ca-app-pub-3940256099942544/5224354917"'
+        }
+        release {
+            minifyEnabled false
+            buildConfigField 'String', 'REWARDED_AD_UNIT_ID', '"ca-app-pub-3352973554477677/6771650805"'
         }
     }
 }
