@@ -2,7 +2,9 @@ package com.odelly.pypet;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.animation.Animation;
@@ -21,6 +23,7 @@ public class MainActivity extends Activity {
         if(!PypetProfileManager.complete(this)){ PypetProfileView.show(this); }
         buildMain();
     }
+    @Override public void onConfigurationChanged(Configuration newConfig){super.onConfigurationChanged(newConfig);buildMain();}
     private void buildMain(){
         ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(28,28,28,28);root.setGravity(Gravity.CENTER_HORIZONTAL);scroll.addView(root);
         String player=PypetProfileManager.playerName(this);String town=PypetProfileManager.townName(this);
@@ -34,7 +37,7 @@ public class MainActivity extends Activity {
         Button clean=button("🧹 Clean up after pet");root.addView(clean);clean.setOnClickListener(v->cleanWaste());safety.suppressHaptics(clean);
         Button bathe=button("🛁 Bathe / Groom Pet");root.addView(bathe);bathe.setOnClickListener(v->{PetCareSystem.bathe(this);status.setText("🛁 "+PetEvolutionManager.name(this)+" is fresh and clean!");refreshAll();audio.petSound(392);});safety.suppressHaptics(bathe);
         Button profile=button("👤 Profile & Town");root.addView(profile);profile.setOnClickListener(v->PypetProfileView.show(this));safety.suppressHaptics(profile);
-        Button world=button("🌎 ENTER THE 3D WORLD");world.setTextSize(20);root.addView(world,new LinearLayout.LayoutParams(-1,72));world.setOnClickListener(v->ImmersiveWorldView.show(this));safety.suppressHaptics(world);
+        Button world=button("🌎 ENTER THE 3D WORLD");world.setTextSize(20);world.setAllCaps(false);world.setTextColor(Color.WHITE);world.setGravity(Gravity.CENTER);world.setPadding(16,0,16,0);world.setBackground(roundButton(Color.rgb(35,92,61),18));world.setContentDescription("Enter the Pypet 3D World");root.addView(world,new LinearLayout.LayoutParams(-1,78));world.setOnClickListener(v->ImmersiveWorldView.show(this));safety.suppressHaptics(world);
         TextView worldHint=new TextView(this);worldHint.setText("Explore buildings, yards, streets and rooms. Enter the Python Academy to learn by doing. Watch for pet waste and keep your town clean.");worldHint.setGravity(Gravity.CENTER);worldHint.setPadding(8,4,8,18);root.addView(worldHint);
         if(BuildConfig.DEBUG){
             root.addView(sectionTitle("🛠 Developer Debug Controls"));TextView debugNote=new TextView(this);debugNote.setText("Debug build only. Normal progression is driven from the World.");root.addView(debugNote);
@@ -53,6 +56,7 @@ public class MainActivity extends Activity {
         if(BuildConfig.DEBUG){root.addView(sectionTitle("🎁 Debug Reward Controls"));TextView rewardExplanation=new TextView(this);rewardExplanation.setText("Debug build: test optional rewarded ads and cosmetic purchases. Normal gameplay uses World landmarks.");root.addView(rewardExplanation);earnButton=button("Watch optional ad: +"+RewardAdManager.COINS_PER_REWARDED_AD+" Pypet Coins");root.addView(earnButton);safety.suppressHaptics(earnButton);List<String> rewardNames=new ArrayList<>();for(RewardCatalog.Item item:RewardCatalog.all())rewardNames.add(item.name+" — "+item.priceCoins+" Pypet Coins ["+item.tier+"]");rewardSpinner=new Spinner(this);rewardSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,rewardNames));root.addView(rewardSpinner);buyButton=button("Unlock selected reward");root.addView(buyButton);safety.suppressHaptics(buyButton);TextView policyNote=new TextView(this);policyNote.setText("Coins and earned cosmetics are local to this game profile and non-transferable. No task requires an advertisement or payment.");root.addView(policyNote);earnButton.setOnClickListener(v->earnCoins());buyButton.setOnClickListener(v->purchaseSelectedItem());}
         refreshRewardStatus();refreshAchievementStatus();setContentView(scroll);
     }
+    private GradientDrawable roundButton(int color,float radius){GradientDrawable g=new GradientDrawable();g.setColor(color);g.setCornerRadius(radius);g.setStroke(2,Color.rgb(22,62,40));return g;}
     private void cleanWaste(){if(!PetCareSystem.hasWaste(this)){status.setText("✨ Nothing to clean right now. Keep exploring with your pet!");return;}PetCareSystem.cleanWaste(this);RewardInventory.completeTask(this,"clean_waste",10);status.setText("🧹 Cleanup complete! "+PetEvolutionManager.name(this)+" is happier and your town is cleaner.");audio.petSound(523);refreshAll();}
     private void feedPet(){PetEvolutionManager.feed(this,PetEvolutionManager.foods().get(0));status.setText(PetEvolutionManager.name(this)+" loved the snack!");audio.petSound(330);refreshAll();animatePet();}
     private void carePet(int coins){PetEvolutionManager.performCare(this);PetCareSystem.bathe(this);if(RewardInventory.completeTask(this,"care_pip",coins))PypetAchievementManager.recordDailyActivity(this);status.setText("🧼 "+PetEvolutionManager.name(this)+" feels cared for!");refreshAll();audio.petSound(392);animatePet();}
