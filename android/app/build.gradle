@@ -7,6 +7,10 @@ android {
     namespace 'com.odelly.pypet'
     compileSdk 35
 
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         applicationId 'com.odelly.pypet'
         minSdk 24
