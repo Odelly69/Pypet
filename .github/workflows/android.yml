@@ -62,3 +62,5 @@ jobs:
         with:
           name: pypet-android-release-unsigned-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+# CI gate: every Android source/workflow change must produce verified APK artifacts.
