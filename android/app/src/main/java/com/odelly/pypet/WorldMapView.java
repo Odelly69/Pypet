@@ -18,18 +18,19 @@ public final class WorldMapView {
         root.addView(world,new LinearLayout.LayoutParams(-1,0,1));
         Button settings=new Button(a); settings.setText("⚙️ Settings"); settings.setAllCaps(false); root.addView(settings,new LinearLayout.LayoutParams(-1,48));
         AlertDialog d=new AlertDialog.Builder(a).setView(root).create(); settings.setOnClickListener(v->PypetSettingsView.show(a,new PypetAudio(),new PypetSafetyGuard(a))); d.setOnDismissListener(x->world.stop()); d.show();
-        if(d.getWindow()!=null){d.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));d.getWindow().setLayout((int)(a.getResources().getDisplayMetrics().widthPixels*.995f),(int)(a.getResources().getDisplayMetrics().heightPixels*.965f));}
+        if(d.getWindow()!=null){d.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));d.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);}
     }
     private static final class WorldCanvas extends View {
         private final Activity a; private final Paint p=new Paint(3),t=new Paint(3); private float zoom=1f,ox=0,oy=0,lastX,lastY,lastDist; private boolean dragging,run=true; private long time=System.currentTimeMillis();
         private final RectF[] buildings=new RectF[6];
         WorldCanvas(Activity a){super(a);this.a=a;t.setTypeface(Typeface.DEFAULT_BOLD);setLayerType(View.LAYER_TYPE_SOFTWARE,null);}
         void stop(){run=false;}
+        @Override protected void onSizeChanged(int w,int h,int oldw,int oldh){super.onSizeChanged(w,h,oldw,oldh);ox=0;oy=0;invalidate();}
         protected void onDraw(Canvas c){float w=getWidth(),h=getHeight();c.drawColor(Color.rgb(139,203,230));c.save();c.translate(w/2+ox,h/2+oy);c.scale(zoom,zoom);float cw=w/zoom,ch=h/zoom;drawTown(c,cw,ch);c.restore();if(run)postInvalidateDelayed(80);}
         private void drawTown(Canvas c,float w,float h){
-            // Continuous terrain: no unexplained floating green UI rectangle.
+            // One continuous terrain layer. Decorative lot rectangles were removed because they could visually overlap landmark bounds at some aspect ratios.
             p.setColor(Color.rgb(117,177,96));c.drawRect(-w,-h,w,h,p);
-            drawWater(c,w,h);drawRoads(c,w,h);drawLots(c,w,h);
+            drawWater(c,w,h);drawRoads(c,w,h);
             house(c,-w*.72f,-h*.43f,w*.02f,-h*.04f,"HOME",Color.rgb(177,91,70),0);
             academy(c,w*.17f,-h*.52f,w*.76f,-h*.03f,1);
             market(c,w*.45f,h*.10f,w*.83f,h*.47f,2);
@@ -42,14 +43,10 @@ public final class WorldMapView {
         }
         private void drawWater(Canvas c,float w,float h){p.setColor(Color.rgb(78,166,194));c.drawOval(-w*.98f,h*.66f,w*.05f,h*1.08f,p);p.setColor(Color.rgb(165,219,224));for(int i=0;i<5;i++)c.drawLine(-w*.85f+i*55,h*.79f,-w*.58f+i*55,h*.79f,p);}
         private void drawRoads(Canvas c,float w,float h){p.setColor(Color.rgb(218,195,151));Path v=new Path();v.moveTo(-w*.065f,-h);v.lineTo(w*.065f,-h);v.lineTo(w*.19f,h);v.lineTo(-w*.19f,h);v.close();c.drawPath(v,p);c.drawRoundRect(-w*.9f,-h*.015f,w*.9f,h*.085f,24,24,p);p.setColor(Color.rgb(201,177,135));p.setStrokeWidth(4);for(int y=-2;y<2;y++)c.drawLine(-w*.9f,y*h*.5f,w*.9f,y*h*.5f,p);}
-        private void drawLots(Canvas c,float w,float h){p.setColor(Color.rgb(139,190,106));c.drawRoundRect(-w*.94f,-h*.70f,-w*.78f,-h*.47f,22,22,p);c.drawRoundRect(w*.78f,-h*.67f,w*.94f,-h*.43f,22,22,p);}
         private void house(Canvas c,float l,float top,float r,float b,String name,int roof,int i){buildings[i]=new RectF(l,top,r,b);float mid=(l+r)/2;float ww=r-l,hh=b-top;
             p.setShadowLayer(10,0,5,Color.argb(65,0,0,0));p.setColor(Color.rgb(247,240,222));c.drawRoundRect(l,top,r,b,14,14,p);p.clearShadowLayer();
-            // roof, eaves and chimney
             p.setColor(roof);Path q=new Path();q.moveTo(l-16,top+5);q.lineTo(mid,top-hh*.36f);q.lineTo(r+16,top+5);q.close();c.drawPath(q,p);p.setColor(Color.rgb(100,79,67));c.drawRect(r-ww*.22f,top-hh*.22f,r-ww*.12f,top-hh*.02f,p);p.setColor(Color.rgb(230,219,192));c.drawRect(l,top+2,r,top+12,p);
-            // windows with frames
             window(c,l+ww*.13f,top+hh*.24f,ww*.17f,hh*.17f);window(c,r-ww*.30f,top+hh*.24f,ww*.17f,hh*.17f);
-            // door and porch
             p.setColor(Color.rgb(104,72,52));c.drawRoundRect(mid-20,b-64,mid+20,b,6,6,p);p.setColor(Color.rgb(230,201,145));c.drawCircle(mid+11,b-34,3,p);
             t.setTextSize(18);t.setColor(Color.rgb(45,52,47));t.setTextAlign(Paint.Align.CENTER);c.drawText(name,mid,top-hh*.39f,t);
         }
