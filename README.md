@@ -10,7 +10,7 @@ Pypet is a multi-pet, learn-by-doing Python academy for Android. It is a standal
 
 Pets live together in a persistent virtual world with homes, parks, gardens, market, grooming, clinic, academy, library and workshop locations. Pet care includes food, water, sleep, play, grooming, happiness, energy and hunger. The world can also contain optional exclusive decorations.
 
-The Android world includes a persistent multi-pet collection, hatchery, lineage-based evolution, named evolutionary forms, rare/uncommon/rare/mythic outcomes, and balanced development. Evolution weighs the nine development categories equally: nutrition/hunger, happiness, health, lessons, play, care, school, exploration and routine. The learner can build different lineages through different combinations of real gameplay and Python learning while keeping earlier pets in the collection.
+The Android world includes a persistent multi-pet collection, hatchery, lineage-based evolution, named evolutionary forms, common/uncommon/rare/mythic outcomes, and balanced development. Evolution weighs the nine development categories equally: nutrition/hunger, happiness, health, lessons, play, care, school, exploration and routine. The learner can build different lineages through different combinations of real gameplay and Python learning while keeping earlier pets in the collection.
 
 ## Calm presentation: animation and sound
 
