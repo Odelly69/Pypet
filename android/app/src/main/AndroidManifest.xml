@@ -4,7 +4,7 @@
     <application
         android:name=".PypetApplication"
         android:theme="@style/AppTheme"
-        android:label="Pypet Python Academy"
+        android:label="PyPet"
         android:icon="@drawable/ic_pypet"
         android:roundIcon="@drawable/ic_pypet"
         android:allowBackup="false"
