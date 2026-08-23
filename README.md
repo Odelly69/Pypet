@@ -24,6 +24,8 @@ The curriculum progresses from beginner to advanced Python and includes syntax, 
 
 OOP explicitly covers classes, objects, inheritance, composition, polymorphism, properties, dataclasses, abstract base classes and protocols. The third-party-library track distinguishes the Python language from the standard library and external ecosystem and introduces Pillow, Pygame, NumPy, pandas, Matplotlib, Requests/httpx, Flask, FastAPI, SQLAlchemy, scikit-learn, PyTorch, Ruff, Black and mypy/Pyright.
 
+The expanded job-readiness path incorporates the earlier curriculum and adds practical algorithms/data structures, APIs, databases, security, deployment/CI, code review, architecture, performance, portfolios, interview practice, a take-home simulation and a final capstone. Graduation is based on demonstrated competency rather than lesson count.
+
 ## Pets
 
 Pypet supports a catalog model rather than a single character. The initial catalog includes dogs, cats, foxes, rabbits, dragons, owls, robots, axolotls, penguins and dinosaurs. A unicorn is a guaranteed core pet and is never an ad-gated reward. Pets have species, names, personalities, needs, inventory, knowledge and XP, and their behavior can be driven by learner-written Python.
@@ -47,3 +49,5 @@ Pet presentation is deliberately calm: no intentional strobing, screen shaking o
 ## Android
 
 The Android application lives under `android/`. It embeds Python 3.13 with Chaquopy and has a GitHub Actions workflow which runs the Python tests, builds the debug APK, verifies that the APK exists, and uploads it as an Actions artifact. The current beta build is `0.1.0-beta5` / version code `6`.
+
+The Academy Java/Python bridge uses Chaquopy `PyObject`; Android CI must build from the current `main` commit rather than the earlier stale failing build.
