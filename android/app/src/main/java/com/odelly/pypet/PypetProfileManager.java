@@ -13,5 +13,6 @@ public final class PypetProfileManager {
     public static String avatar(Context c){return p(c).getString("avatar","🐾");}
     public static boolean complete(Context c){return !playerName(c).trim().isEmpty()&&!townName(c).trim().isEmpty();}
     public static void save(Context c,String player,String town,String avatar){p(c).edit().putString("player_name",player.trim()).putString("town_name",town.trim()).putString("avatar",avatar==null?"🐾":avatar).apply();}
+    public static void setAvatar(Context c,String avatar){p(c).edit().putString("avatar",avatar==null?"🐾":avatar).apply();}
     public static void ensureDefaults(Context c){if(!complete(c))save(c,"Player","My Pypet Town","🐾");}
 }
