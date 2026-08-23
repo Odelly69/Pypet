@@ -4,12 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
+import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
@@ -44,12 +42,11 @@ public final class RewardAdManager {
         loading = true;
         RewardedAd.load(context, adUnitId(), new AdRequest.Builder().build(),
                 new RewardedAdLoadCallback() {
-                    @Override public void onAdLoaded(@NonNull RewardedAd ad) {
+                    @Override public void onAdLoaded(RewardedAd ad) {
                         loading = false;
                         rewardedAd = ad;
-                        setCallbacks(ad);
                     }
-                    @Override public void onAdFailedToLoad(@NonNull LoadAdError error) {
+                    @Override public void onAdFailedToLoad(LoadAdError error) {
                         loading = false;
                         rewardedAd = null;
                         Log.w(TAG, "Rewarded ad unavailable: " + error.getMessage());
@@ -74,30 +71,19 @@ public final class RewardAdManager {
 
         RewardedAd ad = rewardedAd;
         rewardedAd = null;
-        final boolean[] granted = {false};
         ad.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override public void onAdDismissedFullScreenContent() {
+                preload();
+            }
+            @Override public void onAdFailedToShowFullScreenContent(AdError error) {
                 preload();
             }
         });
 
         ad.show(activity, rewardItem -> {
-            if (!granted[0] && RewardInventory.grant(activity, item.id)) {
-                granted[0] = true;
+            // Grant only from Google's earned-reward callback; do not grant on dismissal.
+            if (RewardInventory.grant(activity, item.id)) {
                 listener.onRewardGranted(item);
-            }
-        });
-    }
-
-    private void setCallbacks(RewardedAd ad) {
-        ad.setFullScreenContentCallback(new FullScreenContentCallback() {
-            @Override public void onAdDismissedFullScreenContent() {
-                rewardedAd = null;
-                preload();
-            }
-            @Override public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError error) {
-                rewardedAd = null;
-                preload();
             }
         });
     }
