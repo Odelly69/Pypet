@@ -1,77 +1,50 @@
 package com.odelly.pypet;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 import android.widget.*;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
 import com.google.android.gms.ads.MobileAds;
-import java.util.ArrayList;
-import java.util.List;
 
-/** Main Pypet screen: immersive World is the gameplay hub; developer controls are debug-only. */
+/** Main Pypet screen. Optional subsystems are isolated so startup cannot fail because of audio, ads or Python. */
 public class MainActivity extends Activity {
-    TextView status,rewardStatus,petView,petStats,taskStatus,streakStatus,trophyStatus,hygieneBar,wasteStatus; EditText editor; Python py; RewardAdManager rewardAdManager; Spinner rewardSpinner; Button earnButton,buyButton; PypetAudio audio; PypetSafetyGuard safety;
-    @Override public void onCreate(Bundle state){super.onCreate(state);if(!Python.isStarted())Python.start(new AndroidPlatform(this));py=Python.getInstance();safety=new PypetSafetyGuard(this);audio=new PypetAudio();MobileAds.initialize(this,s->{});rewardAdManager=new RewardAdManager(this);rewardAdManager.preload();PetCareSystem.tick(this);
-        if(!PypetProfileManager.complete(this)){ PypetProfileView.show(this); }
+    TextView status, petView, petStats, hygieneBar, wasteStatus;
+    PypetAudio audio; PypetSafetyGuard safety;
+    @Override public void onCreate(Bundle state) {
+        super.onCreate(state);
+        safety = new PypetSafetyGuard(this);
         buildMain();
+        initializeOptionalSystems();
     }
-    @Override public void onConfigurationChanged(Configuration newConfig){super.onConfigurationChanged(newConfig);buildMain();}
-    private void buildMain(){
-        ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(28,28,28,28);root.setGravity(Gravity.CENTER_HORIZONTAL);scroll.addView(root);
-        String player=PypetProfileManager.playerName(this);String town=PypetProfileManager.townName(this);
-        TextView title=new TextView(this);title.setText("🐾 "+town);title.setTextSize(30);title.setTextColor(Color.DKGRAY);title.setGravity(Gravity.CENTER);root.addView(title);
-        TextView identity=new TextView(this);identity.setText("Welcome, "+player+" • Your town grows as you learn.");identity.setTextSize(18);identity.setGravity(Gravity.CENTER);root.addView(identity);
-        status=new TextView(this);status.setText("Your world grows through play, care, Python learning and balanced development.");status.setTextSize(18);status.setGravity(Gravity.CENTER);root.addView(status);
-        petView=new TextView(this);petView.setTextSize(64);petView.setGravity(Gravity.CENTER);root.addView(petView,new LinearLayout.LayoutParams(-1,190));safety.suppressHaptics(petView);animatePet();
-        petStats=new TextView(this);petStats.setGravity(Gravity.CENTER);root.addView(petStats);refreshPet();
-        hygieneBar=new TextView(this);hygieneBar.setTextSize(18);hygieneBar.setGravity(Gravity.CENTER);root.addView(hygieneBar);
-        wasteStatus=new TextView(this);wasteStatus.setTextSize(17);wasteStatus.setGravity(Gravity.CENTER);root.addView(wasteStatus);
-        Button clean=button("🧹 Clean up after pet");root.addView(clean);clean.setOnClickListener(v->cleanWaste());safety.suppressHaptics(clean);
-        Button bathe=button("🛁 Bathe / Groom Pet");root.addView(bathe);bathe.setOnClickListener(v->{PetCareSystem.bathe(this);status.setText("🛁 "+PetEvolutionManager.name(this)+" is fresh and clean!");refreshAll();audio.petSound(392);});safety.suppressHaptics(bathe);
-        Button profile=button("👤 Profile & Town");root.addView(profile);profile.setOnClickListener(v->PypetProfileView.show(this));safety.suppressHaptics(profile);
-        Button world=button("🌎 ENTER THE 3D WORLD");world.setTextSize(20);world.setAllCaps(false);world.setTextColor(Color.WHITE);world.setGravity(Gravity.CENTER);world.setPadding(16,0,16,0);world.setBackground(roundButton(Color.rgb(35,92,61),18));world.setContentDescription("Enter the Pypet 3D World");root.addView(world,new LinearLayout.LayoutParams(-1,78));world.setOnClickListener(v->ImmersiveWorldView.show(this));safety.suppressHaptics(world);
-        TextView worldHint=new TextView(this);worldHint.setText("Explore buildings, yards, streets and rooms. Enter the Python Academy to learn by doing. Watch for pet waste and keep your town clean.");worldHint.setGravity(Gravity.CENTER);worldHint.setPadding(8,4,8,18);root.addView(worldHint);
-        if(BuildConfig.DEBUG){
-            root.addView(sectionTitle("🛠 Developer Debug Controls"));TextView debugNote=new TextView(this);debugNote.setText("Debug build only. Normal progression is driven from the World.");root.addView(debugNote);
-            LinearLayout actions=new LinearLayout(this);Button feed=button("🍎 Feed"),care=button("🧼 Care"),play=button("🎾 Play"),learn=button("📚 Learn");actions.addView(feed);actions.addView(care);actions.addView(play);actions.addView(learn);root.addView(actions);for(Button b:new Button[]{feed,care,play,learn})safety.suppressHaptics(b);
-            LinearLayout debugWorld=new LinearLayout(this);Button school=button("🏫 School"),hatchery=button("🥚 Hatchery");debugWorld.addView(school);debugWorld.addView(hatchery);root.addView(debugWorld);for(Button b:new Button[]{school,hatchery})safety.suppressHaptics(b);school.setOnClickListener(v->PypetSchoolView.show(this));hatchery.setOnClickListener(v->PypetHatcheryView.show(this));
-            editor=new EditText(this);editor.setGravity(Gravity.TOP|Gravity.START);editor.setText("answer = 2 + 3\nprint(answer)");editor.setHint("Python debug practice");editor.setMinLines(6);root.addView(editor);Button run=button("Run Debug Practice");root.addView(run);safety.suppressHaptics(run);run.setOnClickListener(v->runCode());
-            feed.setOnClickListener(v->feedPet());care.setOnClickListener(v->carePet(10));play.setOnClickListener(v->playPet(10));learn.setOnClickListener(v->learnPet(25));
+    private void initializeOptionalSystems() {
+        try { if (!Python.isStarted()) Python.start(new AndroidPlatform(this)); } catch (Throwable t) { android.util.Log.e("PYPET", "Python startup failed", t); }
+        try { audio = new PypetAudio(); } catch (Throwable t) { android.util.Log.e("PYPET", "Audio construction failed", t); audio = null; }
+        try { MobileAds.initialize(this, s -> {}); } catch (Throwable t) { android.util.Log.e("PYPET", "Ads startup failed", t); }
+        try { PetCareSystem.tick(this); refreshPet(); } catch (Throwable t) { android.util.Log.e("PYPET", "Pet startup failed", t); }
+        if (audio != null) { try { audio.start(); } catch (Throwable t) { android.util.Log.e("PYPET", "Audio start failed", t); } }
+    }
+    private void buildMain() {
+        try {
+            ScrollView scroll = new ScrollView(this);
+            LinearLayout root = new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setPadding(28,28,28,28); root.setGravity(17); scroll.addView(root);
+            TextView title = new TextView(this); title.setText("🐾 Pypet"); title.setTextSize(30); title.setGravity(17); root.addView(title);
+            status = new TextView(this); status.setText("Welcome to your cute Pypet world."); status.setTextSize(18); status.setGravity(17); root.addView(status);
+            petView = new TextView(this); petView.setText("🐾\nYour Pypet"); petView.setTextSize(64); petView.setGravity(17); root.addView(petView, new LinearLayout.LayoutParams(-1,190));
+            petStats = new TextView(this); petStats.setGravity(17); root.addView(petStats);
+            hygieneBar = new TextView(this); hygieneBar.setGravity(17); root.addView(hygieneBar);
+            wasteStatus = new TextView(this); wasteStatus.setGravity(17); root.addView(wasteStatus);
+            Button profile = new Button(this); profile.setText("👤 Profile & Town"); root.addView(profile); profile.setOnClickListener(v -> { try { PypetProfileView.show(this); } catch(Throwable t){ status.setText("Profile temporarily unavailable."); } });
+            Button world = new Button(this); world.setText("🌎 ENTER THE 3D WORLD"); world.setTextSize(20); world.setTextColor(Color.WHITE); world.setBackgroundColor(Color.rgb(35,92,61)); root.addView(world,new LinearLayout.LayoutParams(-1,78)); world.setOnClickListener(v -> { try { ImmersiveWorldView.show(this); } catch(Throwable t){ status.setText("World temporarily unavailable."); } });
+            Button refresh = new Button(this); refresh.setText("🔄 Refresh Pypet"); root.addView(refresh); refresh.setOnClickListener(v -> refreshPet());
+            TextView note = new TextView(this); note.setText("Cute, cozy and safe. Pet needs progress with real time; learning includes healthy breaks."); note.setGravity(17); root.addView(note);
+            setContentView(scroll); refreshPet();
+        } catch(Throwable t) {
+            TextView fallback = new TextView(this); fallback.setText("🐾 Pypet\n\nThe game could not load one optional feature.\nYour saved world is protected.\nPlease restart Pypet."); fallback.setTextSize(20); fallback.setGravity(17); fallback.setPadding(30,30,30,30); setContentView(fallback); android.util.Log.e("PYPET", "UI startup failed", t);
         }
-        Button music=button("♫ Music: ON");root.addView(music);music.setOnClickListener(v->{audio.setEnabled(!audio.isEnabled());music.setText(audio.isEnabled()?"♫ Music: ON":"♫ Music: OFF");if(audio.isEnabled())audio.start();});safety.suppressHaptics(music);audio.start();
-        Button motion=button(safety.reducedMotion()?"Animation: OFF":"Animation: ON");root.addView(motion);motion.setOnClickListener(v->{safety.setReducedMotion(!safety.reducedMotion());motion.setText(safety.reducedMotion()?"Animation: OFF":"Animation: ON");petView.clearAnimation();status.setText(safety.reducedMotion()?"Reduced-motion mode enabled.":"Gentle animation enabled.");if(!safety.reducedMotion())animatePet();});safety.suppressHaptics(motion);
-        TextView safetyNote=new TextView(this);safetyNote.setText("Safety mode: no intentional flashing, strobing, screen shake, rapid animation, or reward haptics. Animation can be turned off.");root.addView(safetyNote);
-        root.addView(sectionTitle("🧬 Pet Development"));TextView evolutionInfo=new TextView(this);evolutionInfo.setText("Every egg is a surprise. Evolution balances nutrition, health, hygiene, care, happiness, play, school, Python learning, exploration and routines equally. Appearance, behavior and descendants are discovered through play.");root.addView(evolutionInfo);
-        root.addView(sectionTitle("🏆 Trophies & Streak"));streakStatus=new TextView(this);trophyStatus=new TextView(this);root.addView(streakStatus);root.addView(trophyStatus);if(BuildConfig.DEBUG){Button trophyButton=button("Developer: View Trophy Cabinet");root.addView(trophyButton);safety.suppressHaptics(trophyButton);trophyButton.setOnClickListener(v->showTrophies());}
-        root.addView(sectionTitle("✨ Treasure Trove"));TextView treasureInfo=new TextView(this);treasureInfo.setText("Optional cosmetic treasures for your World. Core pets, school, learning and care remain available without purchase.");root.addView(treasureInfo);if(BuildConfig.DEBUG){Button treasureStore=button("Developer: Open Treasure Trove");root.addView(treasureStore);treasureStore.setOnClickListener(v->TreasureStore.show(this));safety.suppressHaptics(treasureStore);}
-        root.addView(sectionTitle("🪙 Pypet Coins & World Collection"));TextView coinExplanation=new TextView(this);coinExplanation.setText("Earn coins by caring, learning, playing, maintaining streaks and optionally watching rewarded ads. Coins buy cosmetic World items and never unlock essential care or learning.");root.addView(coinExplanation);rewardStatus=new TextView(this);root.addView(rewardStatus);
-        if(BuildConfig.DEBUG){root.addView(sectionTitle("🎁 Debug Reward Controls"));TextView rewardExplanation=new TextView(this);rewardExplanation.setText("Debug build: test optional rewarded ads and cosmetic purchases. Normal gameplay uses World landmarks.");root.addView(rewardExplanation);earnButton=button("Watch optional ad: +"+RewardAdManager.COINS_PER_REWARDED_AD+" Pypet Coins");root.addView(earnButton);safety.suppressHaptics(earnButton);List<String> rewardNames=new ArrayList<>();for(RewardCatalog.Item item:RewardCatalog.all())rewardNames.add(item.name+" — "+item.priceCoins+" Pypet Coins ["+item.tier+"]");rewardSpinner=new Spinner(this);rewardSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,rewardNames));root.addView(rewardSpinner);buyButton=button("Unlock selected reward");root.addView(buyButton);safety.suppressHaptics(buyButton);TextView policyNote=new TextView(this);policyNote.setText("Coins and earned cosmetics are local to this game profile and non-transferable. No task requires an advertisement or payment.");root.addView(policyNote);earnButton.setOnClickListener(v->earnCoins());buyButton.setOnClickListener(v->purchaseSelectedItem());}
-        refreshRewardStatus();refreshAchievementStatus();setContentView(scroll);
     }
-    private GradientDrawable roundButton(int color,float radius){GradientDrawable g=new GradientDrawable();g.setColor(color);g.setCornerRadius(radius);g.setStroke(2,Color.rgb(22,62,40));return g;}
-    private void cleanWaste(){if(!PetCareSystem.hasWaste(this)){status.setText("✨ Nothing to clean right now. Keep exploring with your pet!");return;}PetCareSystem.cleanWaste(this);RewardInventory.completeTask(this,"clean_waste",10);status.setText("🧹 Cleanup complete! "+PetEvolutionManager.name(this)+" is happier and your town is cleaner.");audio.petSound(523);refreshAll();}
-    private void feedPet(){PetEvolutionManager.feed(this,PetEvolutionManager.foods().get(0));status.setText(PetEvolutionManager.name(this)+" loved the snack!");audio.petSound(330);refreshAll();animatePet();}
-    private void carePet(int coins){PetEvolutionManager.performCare(this);PetCareSystem.bathe(this);if(RewardInventory.completeTask(this,"care_pip",coins))PypetAchievementManager.recordDailyActivity(this);status.setText("🧼 "+PetEvolutionManager.name(this)+" feels cared for!");refreshAll();audio.petSound(392);animatePet();}
-    private void playPet(int coins){PetEvolutionManager.playWith(this);if(RewardInventory.completeTask(this,"play_pip",coins))PypetAchievementManager.recordDailyActivity(this);status.setText("🎾 "+PetEvolutionManager.name(this)+" had a great play session!");refreshAll();audio.petSound(440);animatePet();}
-    private void learnPet(int coins){PetEvolutionManager.completeLesson(this);if(RewardInventory.completeTask(this,"python_lesson",coins)){int streak=PypetAchievementManager.recordDailyActivity(this);PypetAchievementManager.awardTrophy(this,"first_step",10);if(PetEvolutionManager.lessons(this)>=1)PypetAchievementManager.awardTrophy(this,"python_starter",25);if(PypetAchievementManager.awardStreakMilestone(this,streak))status.setText("🏆 Streak evolution boost! Day "+streak+".");else status.setText("📚 Lesson complete! "+PetEvolutionManager.name(this)+" learned with you.");}else status.setText("📚 Lesson practice complete!");refreshAll();audio.petSound(523);animatePet();}
-    private void refreshPet(){PetCareSystem.tick(this);PetEvolutionManager.PetVariant p=PetEvolutionManager.current(this);petView.setText(p.emoji+"\n"+PetEvolutionManager.name(this));petStats.setText(p.displayName+" • Level "+p.level+"\n❤️ Health "+PetEvolutionManager.health(this)+"%   🍖 Hunger "+PetEvolutionManager.hunger(this)+"%   😊 Happiness "+PetEvolutionManager.happiness(this)+"%\n📚 Lessons "+PetEvolutionManager.lessons(this)+"   🎾 Play "+PetEvolutionManager.play(this)+"   🧼 Care "+PetEvolutionManager.care(this));hygieneBar.setText("🧼 Hygiene: "+PetCareSystem.hygiene(this)+"% "+bar(PetCareSystem.hygiene(this))+"\n💩 "+(PetCareSystem.hasWaste(this)?"Your pet has left a mess. Find and clean it!":"No mess right now — your town is clean."));wasteStatus.setText("Pet care: food • water • sleep • hygiene • cleanup • play • affection • learning");}
-    private String bar(int value){StringBuilder s=new StringBuilder("[");int filled=value/10;for(int i=0;i<10;i++)s.append(i<filled?"█":"░");return s.append("]").toString();}
-    private void refreshAll(){refreshPet();refreshRewardStatus();refreshAchievementStatus();}
-    private void animatePet(){if(petView==null||!safety.allowAnimation())return;ScaleAnimation b=new ScaleAnimation(.98f,1.02f,.98f,1.02f,Animation.RELATIVE_TO_SELF,.5f,Animation.RELATIVE_TO_SELF,1f);b.setDuration(safety.safeAnimationDuration(750));b.setRepeatCount(1);b.setRepeatMode(Animation.REVERSE);petView.startAnimation(b);}
-    private TextView sectionTitle(String text){TextView v=new TextView(this);v.setText(text);v.setTextSize(22);v.setTextColor(Color.DKGRAY);v.setPadding(0,24,0,8);return v;}private Button button(String text){Button b=new Button(this);b.setText(text);return b;}
-    private void refreshAchievementStatus(){streakStatus.setText("🔥 Current streak: "+PypetAchievementManager.streak(this)+" days • Best: "+PypetAchievementManager.bestStreak(this));trophyStatus.setText("🏆 Trophies earned: "+PypetAchievementManager.trophyCount(this)+" / "+PypetAchievementManager.trophies().length);}
-    private void showTrophies(){StringBuilder s=new StringBuilder();for(PypetAchievementManager.Trophy t:PypetAchievementManager.trophies())s.append(PypetAchievementManager.hasTrophy(this,t.id)?"🏆 ":"🔒 ").append(t.name).append(" — ").append(t.description).append(" (+").append(t.coins).append(" coins)\n\n");new AlertDialog.Builder(this).setTitle("🏆 Pypet Trophy Cabinet").setMessage(s.toString()).setPositiveButton("Close",null).show();}
-    private void earnCoins(){if(earnButton==null)return;earnButton.setEnabled(false);rewardAdManager.show(this,new RewardAdManager.RewardListener(){public void onCoinsGranted(int coins){refreshRewardStatus();status.setText("You earned "+coins+" Pypet Coins.");earnButton.setEnabled(true);}public void onAdUnavailable(String message){status.setText(message);earnButton.setEnabled(true);}});}
-    private void purchaseSelectedItem(){if(rewardSpinner==null)return;RewardCatalog.Item item=RewardCatalog.all().get(rewardSpinner.getSelectedItemPosition());if(RewardInventory.owns(this,item.id)){status.setText("You already own "+item.name+".");return;}int balance=RewardInventory.coins(this);if(balance<item.priceCoins){new AlertDialog.Builder(this).setTitle("Not enough Pypet Coins").setMessage(item.name+" costs "+item.priceCoins+" coins. You have "+balance+".").setPositiveButton("Earn Coins",(d,w)->earnCoins()).setNegativeButton("Cancel",null).show();return;}new AlertDialog.Builder(this).setTitle("Unlock "+item.name+"?").setMessage(item.description+"\n\nPrice: "+item.priceCoins+" Pypet Coins.").setPositiveButton("Unlock",(d,w)->{if(RewardInventory.purchase(this,item.id)){refreshRewardStatus();if(RewardInventory.count(this)>=5)PypetAchievementManager.awardTrophy(this,"world_builder",100);refreshAchievementStatus();status.setText(item.name+" has been added to your world.");}else status.setText("Purchase could not be completed.");}).setNegativeButton("No thanks",null).show();}
-    private void refreshRewardStatus(){if(rewardStatus!=null)rewardStatus.setText("Pypet Coins: "+RewardInventory.coins(this)+" | World items: "+RewardInventory.count(this)+" / "+RewardCatalog.all().size());}
-    private void runCode(){if(editor==null)return;try{String result=py.getModule("pypet_engine").callAttr("run_lesson",editor.getText().toString()).toString();PetEvolutionManager.completeLesson(this);status.setText(result+"\n🐾 "+PetEvolutionManager.name(this)+" learned too!");audio.petSound(523);refreshAll();animatePet();}catch(Exception e){status.setText("Practice error: "+e.getMessage());audio.petSound(196);}}
-    @Override protected void onPause(){super.onPause();audio.stop();}@Override protected void onResume(){super.onResume();if(audio!=null&&audio.isEnabled())audio.start();}@Override protected void onDestroy(){audio.stop();super.onDestroy();}
+    @Override public void onConfigurationChanged(Configuration newConfig) { super.onConfigurationChanged(newConfig); buildMain(); }
+    private void refreshPet() { try { PetCareSystem.tick(this); PetEvolutionManager.PetVariant p=PetEvolutionManager.current(this); petView.setText(p.emoji+"\n"+PetEvolutionManager.name(this)); petStats.setText(p.displayName+" • Level "+p.level+"\n❤️ Health "+PetEvolutionManager.health(this)+"%   🍖 Hunger "+PetEvolutionManager.hunger(this)+"%   😊 Happiness "+PetEvolutionManager.happiness(this)+"%"); hygieneBar.setText("🧼 Hygiene: "+PetCareSystem.hygiene(this)+"%"); wasteStatus.setText("💩 "+(PetCareSystem.hasWaste(this)?"Your pet has a mess to clean.":"No mess right now.")); } catch(Throwable t) { if(status!=null) status.setText("Your Pypet is safe. Some pet details are temporarily unavailable."); android.util.Log.e("PYPET", "Pet refresh failed", t); } }
 }
