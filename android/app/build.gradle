@@ -11,8 +11,14 @@ android {
         applicationId 'com.odelly.pypet'
         minSdk 24
         targetSdk 35
-        versionCode 2
-        versionName '0.1.0-beta1'
+        versionCode 3
+        versionName '0.1.0-beta2'
+
+        // Chaquopy requires explicit native ABIs. These cover current Android
+        // phones and the common x86_64 development/emulator target.
+        ndk {
+            abiFilters 'arm64-v8a', 'x86_64'
+        }
     }
 }
 
