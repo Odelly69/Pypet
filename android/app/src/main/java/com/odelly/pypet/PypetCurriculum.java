@@ -1,5 +1,6 @@
 package com.odelly.pypet;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -8,15 +9,15 @@ import java.util.List;
 public final class PypetCurriculum {
     public static final class Lesson {
         public final String id, title, skill, task;
-        public Lesson(String id, String title, String skill, String task) { this.id=id; this.title=title; this.skill=skill; this.task=task; }
+        public Lesson(String id,String title,String skill,String task){this.id=id;this.title=title;this.skill=skill;this.task=task;}
     }
     public static final class Module {
         public final String title, description;
         public final List<Lesson> lessons;
-        Module(String title, String description, Lesson... lessons) { this.title=title; this.description=description; this.lessons=Collections.unmodifiableList(Arrays.asList(lessons)); }
+        Module(String title,String description,Lesson... lessons){this.title=title;this.description=description;this.lessons=Collections.unmodifiableList(Arrays.asList(lessons));}
     }
     private static Lesson l(String id,String title,String skill,String task){return new Lesson(id,title,skill,task);}
-    public static final List<Module> MODULES = Collections.unmodifiableList(Arrays.asList(
+    public static final List<Module> MODULES=Collections.unmodifiableList(Arrays.asList(
         new Module("01 • Foundations","Learn Python by changing real things in the World.",
             l("f01","Python & the REPL","syntax","Print a greeting for your pet."),l("f02","Variables & types","variables","Store your pet's name, age and happiness."),l("f03","Numbers & operators","arithmetic","Calculate food and coin totals."),l("f04","Strings","strings","Format a personalized pet message."),l("f05","Booleans & logic","logic","Decide whether your pet needs care."),l("f06","Input & output","io","Ask the player for a town name."),l("f07","if / elif / else","conditionals","Choose an action from pet needs."),l("f08","for loops","loops","Process every item in a supply list."),l("f09","while loops","loops","Run a safe care loop until a need is satisfied.")),
         new Module("02 • Core Python","Build reusable programs and work with collections.",
@@ -34,8 +35,13 @@ public final class PypetCurriculum {
         new Module("08 • 3D Graphics & Animation","Understand the math and design behind immersive worlds.",
             l("d01","3D coordinates","3d","Map x/y/z positions and camera space."),l("d02","Vectors","3d","Move a character using vectors."),l("d03","Transforms","3d","Translate, rotate and scale an object."),l("d04","Meshes","3d","Understand vertices, edges and faces."),l("d05","Materials & lighting","3d","Create readable surfaces and lighting."),l("d06","Camera systems","3d","Build perspective and follow-camera behavior."),l("d07","3D animation","3d","Create a simple character animation state machine."),l("d08","Optimization","3d","Measure and improve frame performance."),l("d09","3D capstone","3d","Build and present a small interactive scene.")),
         new Module("09 • Job Readiness & Mastery","Turn skills into demonstrable professional ability.",
-            l("j01","Git & GitHub","career","Create clean commits and a useful README."),l("j02","Code review","career","Review a change and give actionable feedback."),l("j03","Documentation","career","Document an API and setup process."),l("j04","Architecture","career","Design modules with clear responsibilities."),l("j05","Portfolio project","career","Build a complete Python application."),l("j06","Technical interview","career","Solve and explain coding problems."),l("j07","Debugging interview","career","Diagnose a broken program methodically."),l("j08","Presentation","career","Explain your project and design decisions."),l("j09","Master capstone","career","Plan, build, test and present a professional project."))
+            l("j01","Git & GitHub","career","Create clean commits and a useful README."),l("j02","Code review","career","Review a change and give actionable feedback."),l("j03","Documentation","career","Document an API and setup process."),l("j04","Architecture","career","Design modules with clear responsibilities."),l("j05","Portfolio project","career","Build a complete Python application."),l("j06","Technical interview","career","Solve and explain coding problems."),l("j07","Debugging interview","career","Diagnose a broken program methodically."),l("j08","Presentation","career","Explain your project and design decisions."),l("j09","Master capstone","career","Plan, build, test and present a professional project.") )
     ));
-    private PypetCurriculum() {}
+    private PypetCurriculum(){}
     public static int lessonCount(){int n=0;for(Module m:MODULES)n+=m.lessons.size();return n;}
+    public static List<Lesson> allLessons(){List<Lesson> all=new ArrayList<>();for(Module m:MODULES)all.addAll(m.lessons);return Collections.unmodifiableList(all);}
+    public static int indexOf(String id){List<Lesson> all=allLessons();for(int i=0;i<all.size();i++)if(all.get(i).id.equals(id))return i;return -1;}
+    public static Lesson prerequisite(String id){List<Lesson> all=allLessons();int i=indexOf(id);return i>0?all.get(i-1):null;}
+    public static boolean canStart(String id,int masteredCount){int i=indexOf(id);return i>=0&&i<=masteredCount;}
+    public static Lesson currentLesson(int masteredCount){List<Lesson> all=allLessons();if(all.isEmpty())return null;return all.get(Math.min(Math.max(masteredCount,0),all.size()-1));}
 }
