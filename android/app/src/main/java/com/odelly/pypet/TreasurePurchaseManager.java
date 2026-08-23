@@ -25,7 +25,7 @@ public final class TreasurePurchaseManager implements PurchasesUpdatedListener {
 
     public TreasurePurchaseManager(Context context) {
         prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        verifyUrl = context.getString(com.odelly.pypet.R.string.purchase_verification_url);
+        verifyUrl = BuildConfig.PURCHASE_VERIFICATION_URL;
         PendingPurchasesParams pending = PendingPurchasesParams.newBuilder().enableOneTimeProducts().build();
         billing = BillingClient.newBuilder(context).enablePendingPurchases(pending).setListener(this).build();
     }
