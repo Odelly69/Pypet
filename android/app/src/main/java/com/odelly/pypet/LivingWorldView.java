@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.graphics.*;
 import android.view.*;
 import android.widget.*;
-import java.lang.reflect.Method;
 
 /** Main living town surface with a large world coordinate space. */
 public final class LivingWorldView {
@@ -36,8 +35,9 @@ public final class LivingWorldView {
         @Override public boolean onTouchEvent(MotionEvent e){if(e.getPointerCount()==2){float d=dist(e);if(lastDist>0)zoom=Math.max(MIN,Math.min(MAX,zoom*d/lastDist));lastDist=d;return true;}lastDist=0;switch(e.getActionMasked()){case MotionEvent.ACTION_DOWN:lastX=downX=e.getX();lastY=downY=e.getY();moved=false;return true;case MotionEvent.ACTION_MOVE:float dx=e.getX()-lastX,dy=e.getY()-lastY;if(Math.abs(e.getX()-downX)>10||Math.abs(e.getY()-downY)>10)moved=true;ox+=dx;oy+=dy;lastX=e.getX();lastY=e.getY();invalidate();return true;case MotionEvent.ACTION_UP:if(!moved)tap(e.getX(),e.getY());return true;}return true;}
         private float dist(MotionEvent e){float dx=e.getX(1)-e.getX(0),dy=e.getY(1)-e.getY(0);return(float)Math.sqrt(dx*dx+dy*dy);}
         private void tap(float sx,float sy){float fit=Math.min(getWidth()/W,getHeight()/H)*2.0f*zoom;float x=(sx-getWidth()/2f-ox)/fit,y=(sy-getHeight()/2f-oy)/fit;for(int i=0;i<b.length;i++)if(b[i]!=null&&b[i].contains(x,y)){buildingEvent(i);return;}PetWorldAI.State s=PetWorldAI.tick(a,-1250,1250,-1750,1750);if(Math.hypot(x-s.x,y-s.y)<110)petEvent();}
-        private void buildingEvent(int i){String n=names[i],msg;switch(i){case 0:msg="Home • Feed, play, hygiene, rest and daily pet care.";break;case 1:msg="Python Academy • Learn Python, complete a lesson, then take a healthy break.";break;case 2:msg="Market • Browse rewards and World items.";break;case 3:msg="Workshop • Build, place and improve your town.";break;case 4:msg="Park • Let your pet play and explore.";break;default:msg="Library • Study, review and build confidence.";}new AlertDialog.Builder(a).setTitle("🏠 "+n).setMessage(msg).setPositiveButton("Activity",(d,w)->invokeSafe(n)).setNegativeButton("Close",null).show();}
+        /** A building tap is an action, not a description screen. Open the real activity immediately. */
+        private void buildingEvent(int i){invokeSafe(names[i]);}
         private void petEvent(){new AlertDialog.Builder(a).setTitle("🐾 "+PetEvolutionManager.name(a)).setMessage("Your pet is wandering independently. Let it explore, then care for it when its needs call for you.").setPositiveButton("OK",null).show();}
-        private void invokeSafe(String building){try{Class<?> c=Class.forName("com.odelly.pypet.BuildingEventManager");Method m=c.getMethod("handle",android.content.Context.class,String.class);m.invoke(null,a,building);}catch(Throwable ignored){try{PetCareSystem.tick(a);}catch(Throwable ignored2){}}}
+        private void invokeSafe(String building){try{BuildingEventManager.open(a,building);}catch(Throwable t){android.util.Log.e("PYPET","Building activity failed: "+building,t);Toast.makeText(a,building+" activity is temporarily unavailable.",Toast.LENGTH_SHORT).show();}}
     }
 }
