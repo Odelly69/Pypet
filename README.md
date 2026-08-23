@@ -6,6 +6,10 @@ Pypet is a multi-pet, learn-by-doing Python academy for Android. It is a standal
 
 **Learn Python by programming your pet.** Every lesson introduces a real Python concept, has the learner write real Python, executes it on-device, shows the effect on the pet, explains the result, then gives an experiment and challenge.
 
+## Virtual world and care
+
+Pets live together in a persistent virtual world with homes, parks, gardens, market, grooming, clinic, academy, library and workshop locations. Pet care includes food, water, sleep, play, grooming, happiness, energy and hunger. The world can also contain optional exclusive decorations.
+
 ## Curriculum scope
 
 The curriculum progresses from beginner to advanced Python and includes syntax, control flow, data structures, functions, exceptions, modules/packages, object-oriented programming, the Python data model, files/data, iterators/generators, context managers, typing, standard-library programming, networking, concurrency/asyncio, testing/debugging, packaging/professional Python, third-party ecosystem orientation, and a capstone programmable pet project.
@@ -14,7 +18,13 @@ OOP explicitly covers classes, objects, inheritance, composition, polymorphism, 
 
 ## Pets
 
-Pypet supports a catalog model rather than a single character. The initial catalog includes dogs, cats, foxes, rabbits, dragons, owls, robots, axolotls, penguins and dinosaurs. Pets have species, names, personalities, needs, inventory, knowledge and XP, and their behavior can be driven by learner-written Python.
+Pypet supports a catalog model rather than a single character. The initial catalog includes dogs, cats, foxes, rabbits, dragons, owls, robots, axolotls, penguins and dinosaurs. A unicorn is a guaranteed core pet and is never an ad-gated reward. Pets have species, names, personalities, needs, inventory, knowledge and XP, and their behavior can be driven by learner-written Python.
+
+## Reward Center and optional sponsored items
+
+The Reward Center contains optional, non-transferable exclusive world decorations. The current catalog contains 22 items: Aurora Tree, Rainbow Garden Arch, Tiny Castle, Pet Carousel, UFO Landing Pad, Wizard's Workshop, Miniature Train, Floating Island, Tiny Fantasy Volcano, Unicorn Fountain, Dragon-Roost Tower, Robot Charging Station, Magical Flower Garden, Giant Floating Library, Planetarium, Artist's Studio, Observatory, Campground, Rainbow Bridge, Moon Garden, Star Gazebo and Crystal Fountain.
+
+Rewarded ads are optional and explicitly opted into one at a time. Ads only unlock these exclusive decorations; they do not gate Python lessons, pet care, ordinary pets, the unicorn, required world areas or saved progress. Rewards are non-transferable and remain inside Pypet. Development builds use Google's rewarded-ad test unit; the configured production unit is used only outside debug builds.
 
 ## Sensory safety
 
