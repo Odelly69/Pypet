@@ -24,6 +24,14 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install Python test runner
+        run: python -m pip install pytest
+      - name: Run Python world and curriculum tests
+        run: PYTHONPATH=app/src/main/python pytest app/src/test/python -q
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
       - name: Install Android SDK
