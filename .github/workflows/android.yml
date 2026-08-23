@@ -44,9 +44,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
-      # Use the Gradle distribution supplied by setup-gradle directly. Generating
-      # a wrapper here was an unnecessary failure point and previously stopped the
-      # APK build before compilation.
       - name: Build debug APK
         run: gradle assembleDebug --stacktrace
       - name: Verify APK
