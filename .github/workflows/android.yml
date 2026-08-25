@@ -36,7 +36,7 @@ jobs:
         run: python -m pip install pytest
       - name: Run Python world and curriculum tests
         run: PYTHONPATH=app/src/main/python pytest app/src/test/python -q
-      - name: Verify Academy-only sequential learning
+      - name: Verify Academy-only sequential learning and Home care routing
         run: |
           set -e
           manager=app/src/main/java/com/odelly/pypet/BuildingEventManager.java
@@ -44,8 +44,9 @@ jobs:
           curriculum=app/src/main/java/com/odelly/pypet/PypetCurriculum.java
           session=app/src/main/java/com/odelly/pypet/AcademyLessonSession.java
           activity=app/src/main/java/com/odelly/pypet/BuildingActivityView.java
+          home=app/src/main/java/com/odelly/pypet/PetHomeCareView.java
           grep -q 'case "PYTHON ACADEMY": PypetAcademyActivityView.show' "$manager"
-          grep -q 'case "HOME": BuildingActivityView.home' "$manager"
+          grep -q 'case "HOME": PetHomeCareView.show' "$manager"
           grep -q 'case "MARKET": BuildingActivityView.market' "$manager"
           grep -q 'case "WORKSHOP": BuildingActivityView.workshop' "$manager"
           grep -q 'case "PARK": BuildingActivityView.park' "$manager"
@@ -62,6 +63,16 @@ jobs:
           grep -q 'markSeen' "$session"
           grep -q 'markInspected' "$session"
           grep -q 'Python instruction and sequential lesson progress live exclusively in PyPet Academy' "$activity"
+          grep -q 'FOOD PANTRY • DRAG FOOD TO THE BOWL' "$home"
+          grep -q 'startDragAndDrop' "$home"
+          grep -q 'ACTION_DROP' "$home"
+          grep -q 'FRUIT' "$home"
+          grep -q 'VEGETABLES' "$home"
+          grep -q 'PROTEIN / FISH' "$home"
+          grep -q 'TREATS' "$home"
+          grep -q 'Bathe pet' "$home"
+          grep -q 'Clean up waste' "$home"
+          grep -q 'Complete daily care routine' "$home"
           ! grep -q 'review challenge' "$activity"
           ! grep -q 'final int\[\] correct' "$activity"
       - name: Verify no legacy building learning popup
@@ -170,4 +181,4 @@ jobs:
           name: pypet-android-release-unsigned-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
-# CI gate: Python instruction is Academy-only and strictly sequential from lesson 1 through the final lesson; ordinary World buildings are activities only.
+# CI gate: Python instruction is Academy-only and strictly sequential; Home is the dedicated care/feed/bath station with categorized drag-and-drop food; ordinary World buildings are activities only.
