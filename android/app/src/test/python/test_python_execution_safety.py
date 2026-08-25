@@ -1,5 +1,3 @@
-import pytest
-
 from pypet_curriculum import LESSONS, STANDARD_LIBRARY, ECOSYSTEM
 from pypet_engine import run_lesson
 
@@ -36,3 +34,9 @@ def test_python_namespace_does_not_expose_import_builtin():
 def test_python_namespace_does_not_expose_open_builtin():
     result = run_lesson("answer = open('secret.txt').read()")
     assert result["ok"] is False
+
+
+def test_python_namespace_rejects_dunder_escape_path():
+    result = run_lesson("answer = ().__class__.__base__.__subclasses__()")
+    assert result["ok"] is False
+    assert "Dunder" in result["error"]
