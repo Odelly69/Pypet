@@ -63,14 +63,16 @@ jobs:
           grep -q 'markSeen' "$session"
           grep -q 'markInspected' "$session"
           grep -q 'Python instruction and sequential lesson progress live exclusively in PyPet Academy' "$activity"
-          grep -q 'FOOD PANTRY • DRAG FOOD TO THE BOWL' "$home"
+          grep -q 'Swipe left/right to rotate rooms' "$home"
+          grep -q 'DROP FOOD HERE' "$home"
           grep -q 'startDragAndDrop' "$home"
           grep -q 'ACTION_DROP' "$home"
           grep -q 'FRUIT' "$home"
           grep -q 'VEGETABLES' "$home"
           grep -q 'PROTEIN / FISH' "$home"
           grep -q 'TREATS' "$home"
-          grep -q 'Bathe pet' "$home"
+          grep -q 'Drag the animated shower head' "$home"
+          grep -q 'PetCareSystem.bathe' "$home"
           grep -q 'Clean up waste' "$home"
           grep -q 'Complete daily care routine' "$home"
           ! grep -q 'review challenge' "$activity"
@@ -98,6 +100,7 @@ jobs:
           grep -q 'private static float half(Context c)' "$placement"
           grep -q 'ROAD_BLOCK=205f' "$placement"
           grep -q 'void placeUnique' "$placement"
+          grep -q 'Math.hypot(x-other.x,y-other.y)' "$placement"
           grep -q 'halfSize' "$expansion"
           grep -q 'expand(Context c)' "$expansion"
           grep -q 'attachToWorld' "$builder"
@@ -181,4 +184,4 @@ jobs:
           name: pypet-android-release-unsigned-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
-# CI gate: Python instruction is Academy-only and strictly sequential; Home is the dedicated care/feed/bath station with categorized drag-and-drop food; ordinary World buildings are activities only.
+# CI gate: Python instruction is Academy-only and strictly sequential; Home is the dedicated care/feed/bath station with categorized drag-and-drop food and a draggable shower; ordinary World buildings are distinct activities only.
