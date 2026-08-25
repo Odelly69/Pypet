@@ -45,7 +45,8 @@ public final class WorldPlacementManager {
         return true;
     }
     private static boolean isBuilding(String id){if(id==null)return false;String s=id.toLowerCase();return s.contains("building")||s.contains("workshop")||s.contains("academy")||s.contains("market")||s.contains("library")||s.contains("home")||s.contains("hatchery")||s.contains("trophy_hall")||s.contains("castle")||s.contains("tower")||s.contains("palace");}
-    private static boolean inBuildingLot(float x,float y,float pad){return inRect(x,y,-910,-990,-250,-560,pad)||inRect(x,y,250,-990,910,-560,pad)||inRect(x,y,-910,250,-250,670,pad)||inRect(x,y,250,250,910,670,pad)||inRect(x,y,-910,720,-250,1090,pad)||inRect(x,y,250,720,910,1090,pad);}
+    /** Only actual building parcels are eligible. The dedicated Park footprint is never a building lot. */
+    private static boolean inBuildingLot(float x,float y,float pad){return inRect(x,y,-910,-990,-250,-560,pad)||inRect(x,y,250,-990,910,-560,pad)||inRect(x,y,-910,250,-250,670,pad)||inRect(x,y,250,250,910,670,pad)||inRect(x,y,250,720,910,1090,pad);}
     private static boolean parkAllowed(String id){if(id==null)return false;return id.equals("bench")||id.equals("flower_bed")||id.equals("tree")||id.equals("garden_sign")||id.equals("lamp")||id.equals("fountain")||id.equals("garden")||id.equals("garden_patch");}
     private static boolean inBuilding(float x,float y,float l,float t,float r,float b,float pad){return x>=l-pad&&x<=r+pad&&y>=t-pad&&y<=b+pad;}
     private static boolean inRect(float x,float y,float l,float t,float r,float b,float pad){return x>=l-pad&&x<=r+pad&&y>=t-pad&&y<=b+pad;}
