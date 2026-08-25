@@ -90,7 +90,11 @@ _add("Master", "M", [
     ("Data Project", "database and data processing", "Build persistent world analytics.", "sqlite3"),
     ("Network Project", "networked application", "Build a robust client/server world feature.", "socket"),
     ("Testing Project", "quality engineering", "Test and repair a deliberately broken project.", "unittest"),
-    ("Capstone", "independent Python engineering", "Design, build, debug, test, and explain a substantial world system.", "python"),
+    ("Professional Architecture", "architecture and maintainability", "Turn a growing PyPet subsystem into a documented, testable package.", "dataclasses"),
+    ("Data & Analytics Project", "SQLite, data processing and reporting", "Build a persistent pet analytics report and explain its findings.", "sqlite3"),
+    ("Production Service Project", "HTTP, async and reliability", "Design a small resilient service for a world feature with timeouts and error handling.", "asyncio"),
+    ("Portfolio & Job Readiness", "Git, code review, debugging and presentation", "Prepare a professional Python project, explain tradeoffs, and defend it in a mock interview.", "python"),
+    ("Capstone", "independent Python engineering", "Design, build, debug, test, document, and explain a substantial world system.", "python"),
 ])
 
 STANDARD_LIBRARY = [
