@@ -15,7 +15,7 @@ public final class BuildingLearningGateView {
 
     public static void show(Activity a, String building) {
         if ("ACADEMY".equalsIgnoreCase(building)) {
-            AcademyLessonSession.show(a);
+            PypetAcademyActivityView.show(a);
             return;
         }
         LinearLayout root = new LinearLayout(a);
@@ -42,7 +42,7 @@ public final class BuildingLearningGateView {
         Button academy = new Button(a);
         academy.setText("🏫 GO TO ACADEMY");
         academy.setAllCaps(false);
-        academy.setOnClickListener(v -> AcademyLessonSession.show(a));
+        academy.setOnClickListener(v -> PypetAcademyActivityView.show(a));
         root.addView(academy);
 
         Button back = new Button(a);
