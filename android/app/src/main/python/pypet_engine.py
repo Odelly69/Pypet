@@ -1,3 +1,4 @@
+import ast
 from dataclasses import dataclass, asdict
 from typing import Any
 from pypet_curriculum import lesson_for, total_lessons, STANDARD_LIBRARY, ECOSYSTEM
@@ -27,8 +28,10 @@ class PetState:
         self.xp += xp
         return asdict(self)
 
+
 def current_lesson(index: int = 0) -> dict[str, Any]:
     return lesson_for(index)
+
 
 def curriculum_info() -> dict[str, Any]:
     return {
@@ -38,8 +41,57 @@ def curriculum_info() -> dict[str, Any]:
         'ecosystem': ECOSYSTEM,
     }
 
+
+class _SafetyVisitor(ast.NodeVisitor):
+    """Reject syntax that can escape the hands-on educational sandbox."""
+    MAX_NODES = 1800
+    MAX_SOURCE = 24000
+
+    def __init__(self):
+        self.nodes = 0
+
+    def generic_visit(self, node):
+        self.nodes += 1
+        if self.nodes > self.MAX_NODES:
+            raise ValueError('Code is too large for the lesson sandbox.')
+        super().generic_visit(node)
+
+    def visit_Import(self, node):
+        raise ValueError('Imports are disabled in the lesson sandbox.')
+
+    def visit_ImportFrom(self, node):
+        raise ValueError('Imports are disabled in the lesson sandbox.')
+
+    def visit_Attribute(self, node):
+        if node.attr.startswith('__'):
+            raise ValueError('Dunder attributes are disabled in the lesson sandbox.')
+        self.generic_visit(node)
+
+    def visit_Name(self, node):
+        if node.id.startswith('__'):
+            raise ValueError('Dunder names are disabled in the lesson sandbox.')
+        self.generic_visit(node)
+
+    def visit_Call(self, node):
+        if isinstance(node.func, ast.Name) and node.func.id in {
+            'eval', 'exec', 'compile', 'globals', 'locals', 'vars', 'dir', 'help', 'breakpoint'
+        }:
+            raise ValueError(f'{node.func.id} is disabled in the lesson sandbox.')
+        self.generic_visit(node)
+
+
+def _validate_source(code: str) -> ast.AST:
+    if not isinstance(code, str) or not code.strip():
+        raise ValueError('Write some Python code first.')
+    if len(code) > _SafetyVisitor.MAX_SOURCE:
+        raise ValueError('Code is too long for one lesson run.')
+    tree = ast.parse(code, mode='exec')
+    _SafetyVisitor().visit(tree)
+    return tree
+
+
 def run_lesson(code: str, expected: str | None = None) -> dict[str, Any]:
-    """Run a hands-on exercise in a restricted namespace."""
+    """Run a hands-on exercise in a deliberately restricted Python namespace."""
     safe_builtins = {
         'abs': abs, 'all': all, 'any': any, 'bool': bool, 'dict': dict,
         'enumerate': enumerate, 'filter': filter, 'float': float,
@@ -52,7 +104,9 @@ def run_lesson(code: str, expected: str | None = None) -> dict[str, Any]:
     output: list[str] = []
     namespace['print'] = lambda *args, **kwargs: output.append(' '.join(map(str, args)))
     try:
-        exec(code, namespace, namespace)
+        tree = _validate_source(code)
+        compiled = compile(tree, '<pypet-lesson>', 'exec')
+        exec(compiled, namespace, namespace)
         result = namespace.get('answer', None)
         passed = expected is None or str(result).strip() == expected.strip()
         return {'ok': True, 'passed': passed, 'answer': repr(result), 'output': '\n'.join(output)}
