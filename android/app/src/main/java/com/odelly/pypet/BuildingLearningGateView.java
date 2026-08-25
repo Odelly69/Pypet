@@ -12,10 +12,7 @@ import com.chaquo.python.Python;
 /** Every non-Academy building teaches a small Python skill before its activity. */
 public final class BuildingLearningGateView {
     private BuildingLearningGateView() {}
-    private static final class Lesson {
-        final String building, skill, title, teaching, example, mission, hint;
-        Lesson(String building,String skill,String title,String teaching,String example,String mission,String hint){this.building=building;this.skill=skill;this.title=title;this.teaching=teaching;this.example=example;this.mission=mission;this.hint=hint;}
-    }
+    private static final class Lesson { final String building,skill,title,teaching,example,mission,hint; Lesson(String building,String skill,String title,String teaching,String example,String mission,String hint){this.building=building;this.skill=skill;this.title=title;this.teaching=teaching;this.example=example;this.mission=mission;this.hint=hint;} }
     public static void show(Activity a,String building){
         Lesson l=lessonFor(building);LinearLayout root=new LinearLayout(a);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(22,18,22,18);ScrollView scroll=new ScrollView(a);scroll.addView(root);
         TextView title=text(a,l.building+" • LEARN BY DOING",25,true);title.setGravity(Gravity.CENTER);root.addView(title);
@@ -23,7 +20,7 @@ public final class BuildingLearningGateView {
         TextView lesson=text(a,"📘 "+l.title+"\n\n"+l.teaching,17,false);lesson.setPadding(18,16,18,16);lesson.setBackgroundColor(Color.rgb(241,246,235));root.addView(lesson);
         TextView example=text(a,"WORKED EXAMPLE\n\n"+l.example+"\n\nNow change it yourself for the mission.",16,false);example.setTypeface(Typeface.MONOSPACE);example.setPadding(18,14,18,14);root.addView(example);
         TextView mission=text(a,"🎯 YOUR MISSION\n"+l.mission,17,true);mission.setPadding(0,16,0,12);root.addView(mission);
-        EditText code=new EditText(a);code.setHint("Write Python here...");code.setMinLines(7);code.setGravity(Gravity.TOP|Gravity.START);code.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE|InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);root.addView(code,new LinearLayout.LayoutParams(-1,0,1));
+        EditText code=new EditText(a);code.setHint("Write Python here...");code.setMinLines(8);code.setMinHeight(360);code.setGravity(Gravity.TOP|Gravity.START);code.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE|InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);root.addView(code,new LinearLayout.LayoutParams(-1,-2));
         TextView result=text(a,"",15,false);result.setPadding(0,10,0,10);root.addView(result);
         Button run=button(a,"▶ RUN REAL PYTHON");root.addView(run);Button hint=button(a,"💡 SHOW HINT");root.addView(hint);Button enter=button(a,"🔒 PASS THE LESSON TO ENTER "+l.building);enter.setEnabled(false);root.addView(enter);
         code.setText(a.getSharedPreferences("pypet_building_lessons",0).getString(l.building,""));
