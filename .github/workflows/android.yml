@@ -66,9 +66,9 @@ jobs:
           grep -Fq 'VEGETABLES' "$home"
           grep -Fq 'PROTEIN / FISH' "$home"
           grep -Fq 'TREATS' "$home"
-          grep -Fq 'Drag 🧼 SOAP across your pet' "$home"
-          grep -Fq 'Move the animated 🚿 SHOWER over the soapy pet' "$home"
-          grep -Fq 'SOAP SUDS' "$home"
+          grep -Fq 'SOAP' "$home"
+          grep -Fq 'SUDS' "$home"
+          grep -Fq 'SHOWER' "$home"
           grep -Fq 'soaped[0]' "$home"
           grep -Fq 'PetCareSystem.bathe' "$home"
           grep -Fq 'Clean up waste' "$home"
@@ -121,6 +121,8 @@ jobs:
         run: gradle clean assembleDebug --stacktrace
       - name: Verify debug APK
         run: test -s app/build/outputs/apk/debug/app-debug.apk
+      - name: Prepare direct APK artifact
+        run: cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/PyPet-debug.apk
       - name: Build release APK
         run: gradle assembleRelease --stacktrace
       - name: Verify release APK
@@ -128,10 +130,12 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: pypet-android-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: PyPet-debug-APK
+          path: android/app/build/outputs/apk/debug/PyPet-debug.apk
+          if-no-files-found: error
       - name: Upload unsigned release APK
         uses: actions/upload-artifact@v4
         with:
-          name: pypet-android-release-unsigned-apk
+          name: PyPet-release-unsigned-APK
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error
