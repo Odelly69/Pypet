@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.widget.Toast;
 
-/** In-world router. Buildings teach a Python skill first; the Academy opens the full curriculum. */
+/** In-world router. Python teaching is exclusive to PyPet Academy; other buildings are activities. */
 public final class BuildingEventManager {
     private BuildingEventManager() {}
     public static void handle(Context context,String building){if(context instanceof Activity)open((Activity)context,building);}
@@ -12,7 +12,11 @@ public final class BuildingEventManager {
         try{
             switch(building){
                 case "PYTHON ACADEMY": PypetAcademyActivityView.show(a); break;
-                case "HOME": case "MARKET": case "WORKSHOP": case "PARK": case "LIBRARY": BuildingLearningGateView.show(a,building); break;
+                case "HOME": BuildingActivityView.home(a); break;
+                case "MARKET": BuildingActivityView.market(a); break;
+                case "WORKSHOP": BuildingActivityView.workshop(a); break;
+                case "PARK": BuildingActivityView.park(a); break;
+                case "LIBRARY": BuildingActivityView.library(a); break;
                 default: Toast.makeText(a,"No activity registered for "+building,Toast.LENGTH_SHORT).show();
             }
         }catch(Throwable t){android.util.Log.e("PYPET","Building activity failed: "+building,t);Toast.makeText(a,building+" could not open. Please try again.",Toast.LENGTH_SHORT).show();}
