@@ -3,6 +3,7 @@ package com.odelly.pypet;
 import android.app.Activity;
 import android.content.ClipData;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.view.DragEvent;
 import android.view.MotionEvent;
@@ -45,21 +46,53 @@ public final class PetHomeCareView {
         return r;
     }
     private static LinearLayout bathroom(Activity a,TextView stats){
-        LinearLayout r=room(a,"🚿 BATHROOM","First drag 🧼 SOAP over your pet to make suds. Then drag the animated 🚿 SHOWER over the pet to rinse the suds away.");
+        LinearLayout r=room(a,"🚿 BATHROOM","Drag 🧼 SOAP across your pet to make suds. Move the animated 🚿 SHOWER over the soapy pet to rinse the suds away.");
         FrameLayout showerRoom=new FrameLayout(a);showerRoom.setMinimumHeight(500);showerRoom.setBackgroundColor(Color.rgb(220,236,238));
         TextView pet=text(a,PetEvolutionManager.isHatched(a)?"🐾\nPET SHOWER ZONE":"🥚 Hatch your pet first",24,true);pet.setGravity(Gravity.CENTER);FrameLayout.LayoutParams pp=new FrameLayout.LayoutParams(250,250,Gravity.CENTER);pp.topMargin=80;showerRoom.addView(pet,pp);
         TextView suds=text(a,"🫧🫧🫧\nSOAP SUDS",22,true);suds.setGravity(Gravity.CENTER);suds.setVisibility(View.GONE);FrameLayout.LayoutParams sp=new FrameLayout.LayoutParams(230,120,Gravity.CENTER);sp.topMargin=100;showerRoom.addView(suds,sp);
         final boolean[] soaped={false};
         TextView soap=text(a,"🧼",44,true);soap.setGravity(Gravity.CENTER);FrameLayout.LayoutParams sop=new FrameLayout.LayoutParams(100,90);sop.leftMargin=430;sop.topMargin=20;showerRoom.addView(soap,sop);
         final float[] soapStart={430,20};
-        soap.setOnTouchListener((v,e)->{if(e.getAction()==MotionEvent.ACTION_DOWN){soapStart[0]=v.getX();soapStart[1]=v.getY();return true;}if(e.getAction()==MotionEvent.ACTION_MOVE){v.setX(e.getRawX()-v.getWidth()/2f);v.setY(e.getRawY()-v.getHeight()-35f);v.setRotation((float)Math.sin(e.getRawX()/30f)*7f);return true;}if(e.getAction()==MotionEvent.ACTION_UP){float cx=v.getX()+v.getWidth()/2f,cy=v.getY()+v.getHeight()/2f;if(cx>70&&cx<450&&cy>90&&cy<390&&requirePet(a)){soaped[0]=true;suds.setVisibility(View.VISIBLE);suds.setAlpha(0f);suds.setScaleX(.7f);suds.setScaleY(.7f);suds.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(350).start();Toast.makeText(a,"🧼 Soap applied! Suds are ready to rinse.",Toast.LENGTH_SHORT).show();soap.animate().x(430).y(20).rotation(0).setDuration(250).start();}else{soap.animate().x(soapStart[0]).y(soapStart[1]).rotation(0).setDuration(250).start();}return true;}return true;});
+        soap.setOnTouchListener((v,e)->{
+            if(e.getAction()==MotionEvent.ACTION_DOWN){soapStart[0]=v.getX();soapStart[1]=v.getY();return true;}
+            if(e.getAction()==MotionEvent.ACTION_MOVE){
+                v.setX(e.getRawX()-v.getWidth()/2f);v.setY(e.getRawY()-v.getHeight()-35f);v.setRotation((float)Math.sin(e.getRawX()/30f)*7f);
+                if(requirePet(a) && overlaps(v,pet)){
+                    if(!soaped[0]){
+                        soaped[0]=true;suds.setVisibility(View.VISIBLE);suds.setAlpha(0f);suds.setScaleX(.7f);suds.setScaleY(.7f);
+                        suds.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(350).start();
+                        Toast.makeText(a,"🧼 Scrub! Soap suds are building up.",Toast.LENGTH_SHORT).show();
+                    }
+                }
+                return true;
+            }
+            if(e.getAction()==MotionEvent.ACTION_UP){
+                if(soaped[0]) Toast.makeText(a,"🧼 Great scrub! Now rinse with the shower.",Toast.LENGTH_SHORT).show();
+                soap.animate().x(soapStart[0]).y(soapStart[1]).rotation(0).setDuration(250).start();return true;
+            }
+            return true;
+        });
         TextView head=text(a,"🚿",46,true);head.setGravity(Gravity.CENTER);FrameLayout.LayoutParams hp=new FrameLayout.LayoutParams(100,90);hp.leftMargin=40;hp.topMargin=20;showerRoom.addView(head,hp);
         final float[] showerStart={40,20};
-        head.setOnTouchListener((v,e)->{if(e.getAction()==MotionEvent.ACTION_DOWN){showerStart[0]=v.getX();showerStart[1]=v.getY();return true;}if(e.getAction()==MotionEvent.ACTION_MOVE){v.setX(e.getRawX()-v.getWidth()/2f);v.setY(e.getRawY()-v.getHeight()-35f);v.setRotation((float)Math.sin(e.getRawX()/35f)*5f);return true;}if(e.getAction()==MotionEvent.ACTION_UP){float cx=v.getX()+v.getWidth()/2f,cy=v.getY()+v.getHeight()/2f;if(cx>70&&cx<450&&cy>90&&cy<390&&requirePet(a)){if(soaped[0]){head.animate().rotation(0).setDuration(180).start();suds.animate().alpha(0f).scaleX(1.4f).scaleY(1.4f).setDuration(450).withEndAction(()->{suds.setVisibility(View.GONE);suds.setAlpha(1f);suds.setScaleX(1f);suds.setScaleY(1f);}).start();soaped[0]=false;PetCareSystem.bathe(a);RewardInventory.completeTask(a,"bath",3);refreshStats(a,stats);Toast.makeText(a,"🚿 Rinse complete! The soap suds are washed away.",Toast.LENGTH_SHORT).show();}else{Toast.makeText(a,"🧼 Apply soap first so the shower can rinse the suds.",Toast.LENGTH_SHORT).show();head.animate().x(showerStart[0]).y(showerStart[1]).rotation(0).setDuration(250).start();}}else{head.animate().x(showerStart[0]).y(showerStart[1]).rotation(0).setDuration(250).start();}return true;}return true;});
-        TextView instruction=text(a,"1️⃣ Drag 🧼 SOAP → pet  •  2️⃣ Drag 🚿 SHOWER → pet to rinse",15,true);instruction.setGravity(Gravity.CENTER);FrameLayout.LayoutParams ip=new FrameLayout.LayoutParams(-1,70,Gravity.BOTTOM);showerRoom.addView(instruction,ip);
+        head.setOnTouchListener((v,e)->{
+            if(e.getAction()==MotionEvent.ACTION_DOWN){showerStart[0]=v.getX();showerStart[1]=v.getY();return true;}
+            if(e.getAction()==MotionEvent.ACTION_MOVE){v.setX(e.getRawX()-v.getWidth()/2f);v.setY(e.getRawY()-v.getHeight()-35f);v.setRotation((float)Math.sin(e.getRawX()/35f)*5f);return true;}
+            if(e.getAction()==MotionEvent.ACTION_UP){
+                if(requirePet(a) && soaped[0] && overlaps(v,pet)){
+                    head.animate().rotation(0).setDuration(180).start();
+                    suds.animate().alpha(0f).scaleX(1.4f).scaleY(1.4f).setDuration(450).withEndAction(()->{suds.setVisibility(View.GONE);suds.setAlpha(1f);suds.setScaleX(1f);suds.setScaleY(1f);}).start();
+                    soaped[0]=false;PetCareSystem.bathe(a);RewardInventory.completeTask(a,"bath",3);refreshStats(a,stats);
+                    Toast.makeText(a,"🚿 Rinse complete! The soap suds are washed away.",Toast.LENGTH_SHORT).show();
+                } else if(requirePet(a) && !soaped[0]) Toast.makeText(a,"🧼 Scrub your pet with soap first.",Toast.LENGTH_SHORT).show();
+                head.animate().x(showerStart[0]).y(showerStart[1]).rotation(0).setDuration(250).start();return true;
+            }
+            return true;
+        });
+        TextView instruction=text(a,"1️⃣ DRAG SOAP ACROSS PET → 🫧 SUDS  •  2️⃣ DRAG SHOWER OVER PET → RINSE",14,true);instruction.setGravity(Gravity.CENTER);FrameLayout.LayoutParams ip=new FrameLayout.LayoutParams(-1,70,Gravity.BOTTOM);showerRoom.addView(instruction,ip);
         r.addView(showerRoom,new LinearLayout.LayoutParams(-1,500));
         return r;
     }
+    private static boolean overlaps(View a,View b){Rect ar=new Rect(),br=new Rect();a.getHitRect(ar);b.getHitRect(br);return Rect.intersects(ar,br);}
     private static LinearLayout room(Activity a,String name,String description){LinearLayout r=new LinearLayout(a);r.setOrientation(LinearLayout.VERTICAL);r.setPadding(8,14,8,14);TextView h=text(a,name,23,true);h.setGravity(Gravity.CENTER);r.addView(h);TextView d=text(a,description,15,false);d.setGravity(Gravity.CENTER);d.setPadding(4,8,4,16);r.addView(d);return r;}
     private static void addCategory(Activity a,LinearLayout root,String title,String[] ids,String[] labels){TextView h=text(a,title,17,true);h.setPadding(0,10,0,4);root.addView(h);LinearLayout row=new LinearLayout(a);root.addView(row);for(int i=0;i<ids.length;i++){Button food=button(a,labels[i]);final String id=ids[i];food.setOnLongClickListener(v->{if(!requirePet(a))return true;ClipData data=ClipData.newPlainText("food",id);v.startDragAndDrop(data,new View.DragShadowBuilder(v),null,0);return true;});food.setOnClickListener(v->{if(requirePet(a))Toast.makeText(a,"Long-press then drag to 🥣",Toast.LENGTH_SHORT).show();});row.addView(food,new LinearLayout.LayoutParams(0,-2,1));}}
     private static void feed(Activity a,String id,TextView stats,TextView bowl){for(PetEvolutionManager.PetFood f:PetEvolutionManager.foods())if(f.id.equals(id)){PetEvolutionManager.feed(a,f);RewardInventory.completeTask(a,"feed_"+id,2);refreshStats(a,stats);bowl.setText(f.emoji+"\n"+f.name+"\nYum! 🐾");return;}}
