@@ -21,17 +21,9 @@ public final class PetBodyModel {
     private PetBodyModel(float height, float bodyWidth, float headScale, float legLength,
                          float earScale, float tailScale, float eyeScale,
                          int bodyTone, int accentTone, boolean hasTail, boolean hasEars) {
-        this.height = height;
-        this.bodyWidth = bodyWidth;
-        this.headScale = headScale;
-        this.legLength = legLength;
-        this.earScale = earScale;
-        this.tailScale = tailScale;
-        this.eyeScale = eyeScale;
-        this.bodyTone = bodyTone;
-        this.accentTone = accentTone;
-        this.hasTail = hasTail;
-        this.hasEars = hasEars;
+        this.height = height; this.bodyWidth = bodyWidth; this.headScale = headScale; this.legLength = legLength;
+        this.earScale = earScale; this.tailScale = tailScale; this.eyeScale = eyeScale;
+        this.bodyTone = bodyTone; this.accentTone = accentTone; this.hasTail = hasTail; this.hasEars = hasEars;
     }
 
     /** Stable visual body profile derived only from the visible pet variant id/stage. */
@@ -45,19 +37,17 @@ public final class PetBodyModel {
         float ears = 0.70f + ((h / 997) % 7) * 0.045f;
         float tail = 0.70f + ((h / 3137) % 7) * 0.045f;
         float eyes = 0.88f + ((h / 11) % 5) * 0.035f;
-        int body = tone(h, 0);
-        int accent = tone(h, 1);
-        return new PetBodyModel(height, width, head, legs, ears, tail, eyes,
-                body, accent, !pet.species.equals("Bird"), true);
+        int body = tone(h, 0), accent = tone(h, 1);
+        return new PetBodyModel(height, width, head, legs, ears, tail, eyes, body, accent,
+                !pet.species.equals("Bird"), true);
     }
 
     private static int tone(int seed, int offset) {
         int[][] tones = {
-                {238, 170, 126}, {154, 190, 232}, {174, 145, 205},
-                {137, 185, 137}, {232, 205, 111}, {207, 150, 177},
-                {176, 176, 176}, {229, 144, 112}
+                {238, 170, 126}, {154, 190, 232}, {174, 145, 205}, {137, 185, 137},
+                {232, 205, 111}, {207, 150, 177}, {176, 176, 176}, {229, 144, 112}
         };
         int i = Math.floorMod(seed + offset * 3, tones.length);
-        return (tones[i][0] << 16) | (tones[i][1] << 8) | tones[i][2];
+        return 0xFF000000 | (tones[i][0] << 16) | (tones[i][1] << 8) | tones[i][2];
     }
 }
