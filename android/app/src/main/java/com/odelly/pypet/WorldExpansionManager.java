@@ -15,17 +15,20 @@ public final class WorldExpansionManager {
     public static int maxLevel(){return MAX_LEVEL;}
     public static boolean canExpand(Context c){return level(c)<MAX_LEVEL;}
     public static int nextCost(Context c){return 25 + level(c)*25;}
-    /** Expansion is a progression unlock for the prototype; future economy balancing can charge the displayed target cost. */
+    /** Expand only when the player can actually pay the displayed Pypet Coin cost. */
     public static boolean expand(Context c){
         int current=level(c);
         if(current>=MAX_LEVEL)return false;
+        int cost=nextCost(c);
+        if(!RewardInventory.spendCoins(c,cost))return false;
         c.getSharedPreferences(PREFS,0).edit().putInt(LEVEL,current+1).apply();
         return true;
     }
+    /** Current half-width/half-height of the playable town in world units. */
     public static float halfSize(Context c){return 1200f + level(c)*300f;}
     public static String status(Context c){
         int l=level(c);
         if(l>=MAX_LEVEL)return "MAX TOWN SIZE • 8 DISTRICTS";
-        return "DISTRICT "+(l+1)+" READY • EXPAND TARGET: "+nextCost(c)+" COINS";
+        return "DISTRICT "+(l+1)+" READY • EXPAND: "+nextCost(c)+" COINS";
     }
 }
