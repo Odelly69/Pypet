@@ -92,13 +92,16 @@ jobs:
           evolution=app/src/main/java/com/odelly/pypet/PetEvolutionManager.java
           hatchery=app/src/main/java/com/odelly/pypet/PypetHatcheryView.java
           grep -q 'class Egg' "$evolution"
-          grep -q 'hatchNewEgg' "$evolution"
+          grep -q 'HATCHED' "$evolution"
+          grep -q 'hatchCurrentEgg' "$evolution"
+          grep -q 'putBoolean(HATCHED,true)' "$evolution"
           grep -q 'putString(LINEAGE,e.lineage)' "$evolution"
           grep -q 'private static void evolve' "$evolution"
           grep -q 'variant(p(c).getString(LINEAGE' "$evolution"
           grep -q 'EGG → HATCHLING → GROWING FORM → ADVANCED FORM → MASTER FORM' "$hatchery"
           grep -q 'SAME' "$hatchery"
           grep -q 'Hatch this egg' "$hatchery"
+          grep -q 'hatchCurrentEgg' "$hatchery"
       - name: Verify pet movement is obstacle-aware and grounded
         run: |
           set -e
@@ -145,4 +148,4 @@ jobs:
           name: pypet-android-release-unsigned-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
-# CI gate: every Android source/workflow change must produce verified APK artifacts and prove the World, beginner-first Academy, building routing, grounded pet movement, egg lifecycle, reward/purchase safeguards, and profile/audio requirements are present.
+# CI gate: every Android source/workflow change must produce verified APK artifacts and prove the World, beginner-first Academy, real building activities, grounded pet movement, exact displayed-egg hatching, same-lineage evolution, rewards/purchase safeguards, and profile/audio requirements are present.
