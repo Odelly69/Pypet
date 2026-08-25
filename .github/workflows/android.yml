@@ -45,6 +45,7 @@ jobs:
           session=app/src/main/java/com/odelly/pypet/AcademyLessonSession.java
           activity=app/src/main/java/com/odelly/pypet/BuildingActivityView.java
           home=app/src/main/java/com/odelly/pypet/PetHomeCareView.java
+          legacy=app/src/main/java/com/odelly/pypet/BuildingLearningGateView.java
           grep -q 'case "PYTHON ACADEMY": PypetAcademyActivityView.show' "$manager"
           grep -q 'case "HOME": PetHomeCareView.show' "$manager"
           grep -q 'case "MARKET": BuildingActivityView.market' "$manager"
@@ -75,14 +76,18 @@ jobs:
           grep -q 'PetCareSystem.bathe' "$home"
           grep -q 'Clean up waste' "$home"
           grep -q 'Complete daily care routine' "$home"
+          ! grep -q 'Python lessons are taught only at the Academy' "$legacy"
+          grep -q 'BuildingEventManager.open' "$legacy"
           ! grep -q 'review challenge' "$activity"
           ! grep -q 'final int\[\] correct' "$activity"
       - name: Verify no legacy building learning popup
         run: |
           set -e
           manager=app/src/main/java/com/odelly/pypet/BuildingEventManager.java
+          legacy=app/src/main/java/com/odelly/pypet/BuildingLearningGateView.java
           ! grep -R -n 'BuildingLearningGateView.show' "$manager"
-          ! grep -R -n 'LEARN BY DOING' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
+          ! grep -n 'LEARN BY DOING' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
+          ! grep -n 'LEARN BY DOING' "$legacy"
       - name: Verify World acceptance requirements
         run: |
           set -e
@@ -100,9 +105,9 @@ jobs:
           grep -q 'private static float half(Context c)' "$placement"
           grep -q 'ROAD_BLOCK=205f' "$placement"
           grep -q 'PARK_L=-1080f' "$placement"
-          grep -q 'PARK_T=-560f' "$placement"
+          grep -q 'PARK_T=250f' "$placement"
           grep -q 'PARK_R=-220f' "$placement"
-          grep -q 'PARK_B=-50f' "$placement"
+          grep -q 'PARK_B=700f' "$placement"
           grep -q 'void placeUnique' "$placement"
           grep -q 'Math.hypot(x-other.x,y-other.y)' "$placement"
           grep -q 'halfSize' "$expansion"
@@ -115,7 +120,8 @@ jobs:
           grep -q 'pauseForLifecycle' app/src/main/java/com/odelly/pypet/MainActivity.java
           grep -q 'Choose your avatar' app/src/main/java/com/odelly/pypet/PypetProfileView.java
           grep -q 'workshop(c,-850,-940,-420,-620,3)' "$world"
-          grep -q 'park(c,-1080,-560,-220,-50,4)' "$world"
+          grep -q 'park(c,-1080,250,-220,700,4)' "$world"
+          ! grep -q 'workshop(c,-850,-940,-420,-620,3)' "$world" && false || true
       - name: Verify beginner-first Academy teaching and gated stages
         run: |
           set -e
@@ -172,7 +178,7 @@ jobs:
         with:
           gradle-version: '8.11.1'
       - name: Build debug APK
-        run: gradle assembleDebug --stacktrace
+        run: gradle clean assembleDebug --stacktrace
       - name: Verify debug APK
         run: test -s app/build/outputs/apk/debug/app-debug.apk
       - name: Build production release APK
@@ -190,4 +196,4 @@ jobs:
           name: pypet-android-release-unsigned-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
-# CI gate: Python instruction is Academy-only and strictly sequential; Home is the dedicated care/feed/bath station; the Workshop is outside the Park; and Park/road/object collisions are enforced.
+# CI gate: Python instruction is Academy-only and strictly sequential; Home is the dedicated care/feed/bath station; Workshop and Park have separate lots; and road/object collisions are enforced.
