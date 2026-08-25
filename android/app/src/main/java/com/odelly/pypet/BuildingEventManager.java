@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.widget.Toast;
 
-/** In-world router. Python teaching is exclusive to PyPet Academy; other buildings are activities. */
+/** In-world router. Python teaching is exclusive to PyPet Academy; Home is the dedicated care/feeding station. */
 public final class BuildingEventManager {
     private BuildingEventManager() {}
     public static void handle(Context context,String building){if(context instanceof Activity)open((Activity)context,building);}
@@ -12,7 +12,7 @@ public final class BuildingEventManager {
         try{
             switch(building){
                 case "PYTHON ACADEMY": PypetAcademyActivityView.show(a); break;
-                case "HOME": BuildingActivityView.home(a); break;
+                case "HOME": PetHomeCareView.show(a); break;
                 case "MARKET": BuildingActivityView.market(a); break;
                 case "WORKSHOP": BuildingActivityView.workshop(a); break;
                 case "PARK": BuildingActivityView.park(a); break;
