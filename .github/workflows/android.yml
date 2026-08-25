@@ -93,12 +93,16 @@ jobs:
           grep -q 'tap a building to DO the activity' "$world"
           grep -q 'Math.max(getWidth()/W,getHeight()/H)' "$world"
           grep -q 'drawColor(Color.rgb(151,196,119))' "$world"
-          grep -q 'frontDoor' "$world"
+          grep -q 'door(c,m,bot)' "$world"
           grep -q 'private void window' "$world"
-          grep -q 'groundY' "$world"
+          grep -q 'c.drawOval(s.x-34,s.y-3,s.x+34,s.y+12,p)' "$world"
           grep -q 'PetWorldAI.State' "$world"
           grep -q 'private static float half(Context c)' "$placement"
           grep -q 'ROAD_BLOCK=205f' "$placement"
+          grep -q 'PARK_L=-1080f' "$placement"
+          grep -q 'PARK_T=-560f' "$placement"
+          grep -q 'PARK_R=-220f' "$placement"
+          grep -q 'PARK_B=-50f' "$placement"
           grep -q 'void placeUnique' "$placement"
           grep -q 'Math.hypot(x-other.x,y-other.y)' "$placement"
           grep -q 'halfSize' "$expansion"
@@ -110,6 +114,9 @@ jobs:
           grep -q 'TreasureStore.show' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
           grep -q 'pauseForLifecycle' app/src/main/java/com/odelly/pypet/MainActivity.java
           grep -q 'Choose your avatar' app/src/main/java/com/odelly/pypet/PypetProfileView.java
+          # Workshop is a separate lot above the Park; Park is recreation-only.
+          grep -q 'workshop(c,-850,-940,-420,-620,3)' "$world"
+          grep -q 'park(c,-1080,-560,-220,-50,4)' "$world"
       - name: Verify beginner-first Academy teaching and gated stages
         run: |
           set -e
@@ -184,4 +191,4 @@ jobs:
           name: pypet-android-release-unsigned-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
-# CI gate: Python instruction is Academy-only and strictly sequential; Home is the dedicated care/feed/bath station with categorized drag-and-drop food and a draggable shower; ordinary World buildings are distinct activities only.
+# CI gate: Python instruction is Academy-only and strictly sequential; Home is the dedicated care/feed/bath station; the Workshop is outside the Park; and Park/road/object collisions are enforced.
