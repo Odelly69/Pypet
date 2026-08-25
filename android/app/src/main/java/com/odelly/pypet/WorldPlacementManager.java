@@ -14,8 +14,8 @@ public final class WorldPlacementManager {
     }
     private static final String PREFS="pypet_world_layout",COUNT="placement_count",PREFIX="placement_",TROPHY_PREFIX="trophy_";
     private static final float EDGE=70f,ROAD_BLOCK=205f,OBJECT_PAD=60f;
-    // Exact Park footprint rendered by LivingWorldView: dedicated recreation land only.
-    private static final float PARK_L=-1080f,PARK_T=-560f,PARK_R=-220f,PARK_B=-50f;
+    // Exact Park footprint rendered by LivingWorldView: lower-left recreation land, away from Workshop.
+    private static final float PARK_L=-1080f,PARK_T=250f,PARK_R=-220f,PARK_B=700f;
     private WorldPlacementManager(){}
     private static float half(Context c){return WorldExpansionManager.halfSize(c);}
     private static SharedPreferences prefs(Context c){return c.getSharedPreferences(PREFS,Context.MODE_PRIVATE);}
@@ -37,18 +37,15 @@ public final class WorldPlacementManager {
     }
     private static boolean isValid(Context c,String id,float x,float y,float radius,int ignoreIndex){
         float worldHalf=half(c);if(Math.abs(x)+radius>worldHalf-EDGE||Math.abs(y)+radius>worldHalf-EDGE)return false;
-        // Keep roads/right-of-way clear before considering any other placement rule.
         if(Math.abs(x)<ROAD_BLOCK+radius||Math.abs(y)<ROAD_BLOCK+radius)return false;
-        // Permanent building footprints are independent lots and never park contents.
-        if(inBuilding(x,y,-850,-940,-420,-620,radius)||inBuilding(x,y,420,-940,850,-620,radius)||inBuilding(x,y,420,290,850,600,radius)||inBuilding(x,y,-850,290,-420,600,radius)||inBuilding(x,y,420,760,850,1050,radius))return false;
-        // Exact rendered Park is reserved for recreation/decorations; buildings/trophies cannot enter.
+        if(inBuilding(x,y,-850,-940,-420,-620,radius)||inBuilding(x,y,420,-940,850,-620,radius)||inBuilding(x,y,420,290,850,600,radius)||inBuilding(x,y,-850,290,-420,600,radius)||inBuilding(x,y,-850,760,-420,1060,radius))return false;
         if(inRect(x,y,PARK_L,PARK_T,PARK_R,PARK_B,radius)&&!parkAllowed(id))return false;
         if(isBuilding(id)&&!inBuildingLot(x,y,radius))return false;
         List<Placement> existing=allRaw(c);for(int i=0;i<existing.size();i++){if(i==ignoreIndex)continue;Placement other=existing.get(i);float minDistance=radius+footprint(other.id,saneScale(other.scale))+OBJECT_PAD;if(Math.hypot(x-other.x,y-other.y)<minDistance)return false;}
         return true;
     }
     private static boolean isBuilding(String id){if(id==null)return false;String s=id.toLowerCase();return s.contains("building")||s.contains("workshop")||s.contains("academy")||s.contains("market")||s.contains("library")||s.contains("home")||s.contains("hatchery")||s.contains("trophy_hall")||s.contains("castle")||s.contains("tower")||s.contains("palace");}
-    private static boolean inBuildingLot(float x,float y,float pad){return inRect(x,y,-910,-990,-250,-560,pad)||inRect(x,y,250,-990,910,-560,pad)||inRect(x,y,-910,250,-250,670,pad)||inRect(x,y,250,250,910,670,pad)||inRect(x,y,250,720,910,1080,pad);}
+    private static boolean inBuildingLot(float x,float y,float pad){return inRect(x,y,-910,-990,-250,-560,pad)||inRect(x,y,250,-990,910,-560,pad)||inRect(x,y,-910,250,-250,670,pad)||inRect(x,y,250,250,910,670,pad)||inRect(x,y,-910,720,-250,1090,pad);}
     private static boolean parkAllowed(String id){if(id==null)return false;return id.equals("bench")||id.equals("flower_bed")||id.equals("tree")||id.equals("garden_sign")||id.equals("lamp")||id.equals("fountain")||id.equals("garden")||id.equals("garden_patch");}
     private static boolean inBuilding(float x,float y,float l,float t,float r,float b,float pad){return x>=l-pad&&x<=r+pad&&y>=t-pad&&y<=b+pad;}
     private static boolean inRect(float x,float y,float l,float t,float r,float b,float pad){return x>=l-pad&&x<=r+pad&&y>=t-pad&&y<=b+pad;}
