@@ -36,26 +36,40 @@ jobs:
         run: python -m pip install pytest
       - name: Run Python world and curriculum tests
         run: PYTHONPATH=app/src/main/python pytest app/src/test/python -q
-      - name: Verify real building activity routing and teaching gate
+      - name: Verify Academy-only sequential learning
         run: |
           set -e
           manager=app/src/main/java/com/odelly/pypet/BuildingEventManager.java
-          gate=app/src/main/java/com/odelly/pypet/BuildingLearningGateView.java
+          academy=app/src/main/java/com/odelly/pypet/PypetAcademyActivityView.java
+          curriculum=app/src/main/java/com/odelly/pypet/PypetCurriculum.java
+          session=app/src/main/java/com/odelly/pypet/AcademyLessonSession.java
           activity=app/src/main/java/com/odelly/pypet/BuildingActivityView.java
           grep -q 'case "PYTHON ACADEMY": PypetAcademyActivityView.show' "$manager"
-          grep -q 'BuildingLearningGateView.show' "$manager"
-          grep -q 'public static void show' "$gate"
-          grep -q 'RUN REAL PYTHON' "$gate"
-          grep -q 'lessonFor' "$gate"
-          grep -q 'missionComplete' "$gate"
-          grep -q 'public static void home' "$activity"
-          grep -q 'public static void market' "$activity"
-          grep -q 'public static void workshop' "$activity"
-          grep -q 'public static void park' "$activity"
-          grep -q 'public static void library' "$activity"
-      - name: Verify no legacy building description popup
+          grep -q 'case "HOME": BuildingActivityView.home' "$manager"
+          grep -q 'case "MARKET": BuildingActivityView.market' "$manager"
+          grep -q 'case "WORKSHOP": BuildingActivityView.workshop' "$manager"
+          grep -q 'case "PARK": BuildingActivityView.park' "$manager"
+          grep -q 'case "LIBRARY": BuildingActivityView.library' "$manager"
+          ! grep -q 'BuildingLearningGateView.show' "$manager"
+          grep -q 'currentLesson(mastered)' "$academy"
+          grep -q 'lessonCount()' "$academy"
+          grep -q 'completeLesson(a)' "$academy"
+          grep -q 'indexOf(String id)' "$curriculum"
+          grep -q 'currentLesson(int masteredCount)' "$curriculum"
+          grep -q 'return all.get(Math.max(0,masteredCount))' "$curriculum"
+          grep -q 'canStart(String id,int masteredCount)' "$curriculum"
+          grep -q 'markLearned' "$session"
+          grep -q 'markSeen' "$session"
+          grep -q 'markInspected' "$session"
+          grep -q 'Python instruction and sequential lesson progress live exclusively in PyPet Academy' "$activity"
+          ! grep -q 'review challenge' "$activity"
+          ! grep -q 'final int\[\] correct' "$activity"
+      - name: Verify no legacy building learning popup
         run: |
-          ! grep -R -n 'new AlertDialog' app/src/main/java/com/odelly/pypet/BuildingActivityView.java app/src/main/java/com/odelly/pypet/BuildingEventManager.java app/src/main/java/com/odelly/pypet/BuildingLearningGateView.java
+          set -e
+          manager=app/src/main/java/com/odelly/pypet/BuildingEventManager.java
+          ! grep -R -n 'BuildingLearningGateView.show' "$manager"
+          ! grep -R -n 'LEARN BY DOING' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
       - name: Verify World acceptance requirements
         run: |
           set -e
@@ -156,4 +170,4 @@ jobs:
           name: pypet-android-release-unsigned-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
-# CI gate: every Android source/workflow change must produce verified APK artifacts and prove the World, buildable/expandable town, taught building activities, beginner-first Academy, grounded pet movement, evolution, rewards/purchase safeguards, and profile/audio requirements are present.
+# CI gate: Python instruction is Academy-only and strictly sequential from lesson 1 through the final lesson; ordinary World buildings are activities only.
