@@ -27,10 +27,19 @@ public final class WorldBuilderView {
         LinearLayout root=new LinearLayout(a);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(20,18,20,18);root.setBackgroundColor(Color.rgb(245,241,222));
         TextView title=text(a,"🏗 BUILD YOUR PyPet WORLD",25,true);title.setGravity(Gravity.CENTER);root.addView(title);
         TextView info=text(a,"Your town is persistent. Expand districts, then place accomplishments, parks, gardens and landmarks. Every placement is checked against roads and existing town structures.",16,false);info.setPadding(0,12,0,14);root.addView(info);
-        TextView status=text(a,WorldExpansionManager.status(a)+"\nCurrent size: "+(int)WorldExpansionManager.halfSize(a)*2+" × "+(int)WorldExpansionManager.halfSize(a)*2+" map units\nCoins: "+RewardInventory.coins(a),15,true);status.setPadding(12,12,12,12);status.setBackgroundColor(Color.rgb(224,235,214));root.addView(status);
+        TextView status=text(a,statusText(a),15,true);status.setPadding(12,12,12,12);status.setBackgroundColor(Color.rgb(224,235,214));root.addView(status);
 
-        Button expand=button(a,WorldExpansionManager.canExpand(a)?"🗺 EXPAND TOWN — UNLOCK NEXT DISTRICT":"🗺 TOWN FULL");root.addView(expand);expand.setEnabled(WorldExpansionManager.canExpand(a));
-        expand.setOnClickListener(v->{if(WorldExpansionManager.expand(a)){status.setText(WorldExpansionManager.status(a)+"\nCurrent size: "+(int)WorldExpansionManager.halfSize(a)*2+" × "+(int)WorldExpansionManager.halfSize(a)*2+" map units\nCoins: "+RewardInventory.coins(a));Toast.makeText(a,"🎉 New district unlocked! More land is now buildable.",Toast.LENGTH_SHORT).show();} });
+        Button expand=button(a,WorldExpansionManager.canExpand(a)?"🗺 EXPAND TOWN — "+WorldExpansionManager.nextCost(a)+" COINS":"🗺 TOWN FULL");root.addView(expand);expand.setEnabled(WorldExpansionManager.canExpand(a));
+        expand.setOnClickListener(v->{
+            if(WorldExpansionManager.expand(a)){
+                status.setText(statusText(a));
+                expand.setText(WorldExpansionManager.canExpand(a)?"🗺 EXPAND TOWN — "+WorldExpansionManager.nextCost(a)+" COINS":"🗺 TOWN FULL");
+                expand.setEnabled(WorldExpansionManager.canExpand(a));
+                Toast.makeText(a,"🎉 New district unlocked! More land is now buildable.",Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(a,"💰 You need "+WorldExpansionManager.nextCost(a)+" Pypet Coins to expand.",Toast.LENGTH_SHORT).show();
+            }
+        });
 
         TextView section=text(a,"BUILD / PLACE",18,true);section.setPadding(0,18,0,6);root.addView(section);
         addBuild(root,a,"🏠 HOME LOT","house",760,760);
@@ -46,6 +55,11 @@ public final class WorldBuilderView {
         TextView note=text(a,"Placement is automatic and collision-safe: if the selected spot is on a road, sidewalk conflict, park-restricted area, or building, PyPet finds the nearest legal location instead.",14,false);note.setPadding(0,14,0,10);root.addView(note);
         Button back=button(a,"🌎 RETURN TO WORLD");root.addView(back);back.setOnClickListener(v->{LivingWorldView.show(a);attachToWorld(a);});
         a.setContentView(root);
+    }
+
+    private static String statusText(Activity a){
+        int size=(int)WorldExpansionManager.halfSize(a)*2;
+        return WorldExpansionManager.status(a)+"\nCurrent size: "+size+" × "+size+" map units\nCoins: "+RewardInventory.coins(a);
     }
 
     private static void addBuild(LinearLayout root,Activity a,String label,String id,float x,float y){
