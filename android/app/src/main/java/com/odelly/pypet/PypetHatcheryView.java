@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.*;
 
 /**
@@ -63,7 +64,7 @@ public final class PypetHatcheryView {
         collection.setTextSize(18);
         collection.setGravity(Gravity.CENTER);
         root.addView(collection);
-        refresh(root,a);
+        refresh(collection,a);
 
         new AlertDialog.Builder(a).setView(root).setNegativeButton("Back",null).show();
     }
@@ -73,12 +74,14 @@ public final class PypetHatcheryView {
     }
 
     private static void refresh(LinearLayout root,Activity a){
-        // The final TextView is the collection/status line.
         View v=root.getChildAt(root.getChildCount()-1);
-        if(!(v instanceof TextView))return;
+        if(v instanceof TextView)refresh((TextView)v,a);
+    }
+
+    private static void refresh(TextView v,Activity a){
         PetEvolutionManager.Egg e=PetEvolutionManager.currentEgg(a);
         PetEvolutionManager.PetVariant p=PetEvolutionManager.current(a);
-        ((TextView)v).setText("\n🥚 Egg journeys started: "+PetEvolutionManager.eggCount(a)
+        v.setText("\n🥚 Egg journeys started: "+PetEvolutionManager.eggCount(a)
             +"\n🐣 Current hatch lineage: "+capitalize(e.lineage)
             +"\n🐾 Current form: "+p.displayName
             +"\n🧬 Evolutions on this journey: "+PetEvolutionManager.evolutionCount(a)
