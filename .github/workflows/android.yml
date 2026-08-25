@@ -108,6 +108,8 @@ jobs:
           grep -q 'PARK_T=250f' "$placement"
           grep -q 'PARK_R=-220f' "$placement"
           grep -q 'PARK_B=700f' "$placement"
+          ! grep -q 'PARK_T=-560f' "$placement"
+          ! grep -q 'PARK_B=-50f' "$placement"
           grep -q 'void placeUnique' "$placement"
           grep -q 'Math.hypot(x-other.x,y-other.y)' "$placement"
           grep -q 'halfSize' "$expansion"
@@ -121,7 +123,7 @@ jobs:
           grep -q 'Choose your avatar' app/src/main/java/com/odelly/pypet/PypetProfileView.java
           grep -q 'workshop(c,-850,-940,-420,-620,3)' "$world"
           grep -q 'park(c,-1080,250,-220,700,4)' "$world"
-          ! grep -q 'workshop(c,-850,-940,-420,-620,3)' "$world" && false || true
+          ! grep -q 'park(c,-1080,-560,-220,-50,4)' "$world"
       - name: Verify beginner-first Academy teaching and gated stages
         run: |
           set -e
