@@ -12,151 +12,30 @@ import com.chaquo.python.Python;
 /** Beginner-first Python lesson flow: teach, show, write, run, inspect, debug, practice, challenge, apply, reflect, master. */
 public final class PypetAcademyActivityView {
     private PypetAcademyActivityView(){}
-
     public static void show(Activity a){
         PetEvolutionManager.attendSchool(a);
-        LinearLayout r=new LinearLayout(a);r.setOrientation(LinearLayout.VERTICAL);r.setPadding(20,16,20,16);
-        ScrollView scroll=new ScrollView(a);scroll.addView(r);
+        LinearLayout r=new LinearLayout(a);r.setOrientation(LinearLayout.VERTICAL);r.setPadding(20,16,20,16);ScrollView scroll=new ScrollView(a);scroll.addView(r);
         TextView title=new TextView(a);title.setText("🏫 PyPet Academy — Learn Python by Doing");title.setTextSize(25);title.setTextColor(Color.DKGRAY);title.setGravity(Gravity.CENTER);title.setTypeface(Typeface.DEFAULT_BOLD);r.addView(title);
-        int mastered=PetEvolutionManager.lessons(a);PypetCurriculum.Lesson lesson=PypetCurriculum.currentLesson(mastered);
-        TextView progress=new TextView(a);progress.setGravity(Gravity.CENTER);progress.setTextSize(16);progress.setPadding(0,8,0,10);r.addView(progress);
+        int mastered=PetEvolutionManager.lessons(a);PypetCurriculum.Lesson lesson=PypetCurriculum.currentLesson(mastered);TextView progress=new TextView(a);progress.setGravity(Gravity.CENTER);progress.setTextSize(16);progress.setPadding(0,8,0,10);r.addView(progress);
         if(lesson==null){TextView done=new TextView(a);done.setText("🏆 FULL PYTHON CURRICULUM MASTERED\n\nBuild a portfolio project, review any skill, and keep developing your World.");done.setTextSize(19);done.setGravity(Gravity.CENTER);r.addView(done);returnButton(a,r);a.setContentView(scroll);return;}
-
-        AcademyLessonSession session=new AcademyLessonSession(a,lesson.id);
-        PypetCurriculum.Lesson previous=PypetCurriculum.prerequisite(lesson.id);
+        AcademyLessonSession session=new AcademyLessonSession(a,lesson.id);PypetCurriculum.Lesson previous=PypetCurriculum.prerequisite(lesson.id);
         TextView stage=new TextView(a);stage.setTextSize(17);stage.setGravity(Gravity.CENTER);stage.setPadding(0,8,0,10);r.addView(stage);
         TextView lessonInfo=new TextView(a);lessonInfo.setTextSize(17);lessonInfo.setPadding(0,6,0,10);r.addView(lessonInfo);
         TextView teaching=new TextView(a);teaching.setTextSize(16);teaching.setPadding(16,14,16,14);r.addView(teaching);
         TextView prerequisite=new TextView(a);prerequisite.setTextSize(14);prerequisite.setTextColor(Color.DKGRAY);prerequisite.setPadding(0,6,0,10);r.addView(prerequisite);
         TextView example=new TextView(a);example.setTextSize(15);example.setTypeface(Typeface.MONOSPACE);example.setPadding(16,12,16,12);r.addView(example);
         EditText code=new EditText(a);code.setGravity(Gravity.TOP|Gravity.START);code.setHint("Write Python here when the lesson reaches WRITE...");code.setMinLines(7);code.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE|InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);r.addView(code,new LinearLayout.LayoutParams(-1,0,1));
-        TextView result=new TextView(a);result.setTextSize(15);result.setPadding(0,10,0,10);r.addView(result);
-        Button run=new Button(a);run.setText("▶ RUN REAL PYTHON");r.addView(run);
-        Button advance=new Button(a);r.addView(advance);
-        Button hint=new Button(a);hint.setText("💡 HINT");r.addView(hint);
-
+        TextView result=new TextView(a);result.setTextSize(15);result.setPadding(0,10,0,10);r.addView(result);Button run=new Button(a);run.setText("▶ RUN REAL PYTHON");r.addView(run);Button advance=new Button(a);r.addView(advance);Button hint=new Button(a);hint.setText("💡 HINT");r.addView(hint);
         code.setText(a.getSharedPreferences("pypet_academy_code",0).getString(lesson.id,""));
-        Runnable refresh=()->{
-            AcademyLessonSession.Stage s=session.stage();
-            stage.setText("Stage: "+session.stageLabel()+"\n"+session.instruction());
-            lessonInfo.setText("🎯 LESSON\n"+lesson.title+"\nSkill: "+lesson.skill+"\n\nHands-on mission: "+lesson.task);
-            teaching.setText(teach(lesson.skill,lesson.title,s));
-            prerequisite.setText(previous==null?"🟢 BEGINNER START\nNo previous Python knowledge is required. The lesson below teaches the vocabulary and idea before asking you to code.":"🔗 Prerequisite: "+previous.title+"\nWe review the needed idea here before asking you to use it.");
-            example.setText(exampleFor(lesson.skill,s));
-            boolean coding=s.ordinal()>=AcademyLessonSession.Stage.WRITE.ordinal()&&s!=AcademyLessonSession.Stage.MASTER;
-            code.setVisibility(coding?android.view.View.VISIBLE:android.view.View.GONE);
-            run.setVisibility(coding?android.view.View.VISIBLE:android.view.View.GONE);
-            hint.setVisibility(coding?android.view.View.VISIBLE:android.view.View.GONE);
-            switch(s){
-                case LEARN: advance.setText("I UNDERSTAND — SHOW EXAMPLE ▶"); break;
-                case SEE: advance.setText("I SEE IT — LET ME WRITE ▶"); break;
-                case INSPECT: advance.setText("✓ I INSPECTED THE OUTPUT — CONTINUE ▶"); break;
-                case REFLECT: advance.setText("✓ REFLECTION COMPLETE — MASTER ▶"); break;
-                case MASTER: advance.setText("🏆 COMPLETE LESSON"); break;
-                default: advance.setText("NEXT "+nextStage(s)+" ▶");
-            }
-            advance.setEnabled(s==AcademyLessonSession.Stage.MASTER||session.canAdvance());
-            progress.setText("🐍 "+PypetCurriculum.MODULES.size()+" modules • "+PypetCurriculum.lessonCount()+" cumulative lessons\nMastered "+PetEvolutionManager.lessons(a));
-        };
-        refresh.run();
-
-        run.setOnClickListener(v->{
-            String source=code.getText().toString().trim();
-            if(source.isEmpty()){result.setText("✏️ Write your own Python first. The Academy will not assume you already know Python or silently provide the answer.");return;}
-            a.getSharedPreferences("pypet_academy_code",0).edit().putString(lesson.id,source).apply();
-            try{
-                PyObject py=Python.getInstance().getModule("pypet_engine");
-                String output=py.callAttr("run_lesson",source).toString();
-                boolean executed=output.contains("'ok': True");
-                boolean mission=missionLooksComplete(lesson.skill,source,output);
-                boolean passed=executed&&mission;
-                session.recordRun(passed);
-                if(passed){
-                    result.setText("🧪 Mission step passed.\n\nREAL PYTHON RESULT:\n"+output+"\n\n➡️ Continue to the next learning step.");
-                    refresh.run();
-                }else{
-                    result.setText("🧪 The code ran, but the mission is not complete yet.\n\nUse the lesson explanation and hint, change one thing, then run again.\n\n"+output);
-                    refresh.run();
-                }
-            }catch(Exception e){result.setText("🧪 Python execution error\n"+String.valueOf(e.getMessage())+"\n\nFix the code and run it again.");}
-        });
-
-        advance.setOnClickListener(v->{
-            AcademyLessonSession.Stage s=session.stage();
-            if(s==AcademyLessonSession.Stage.MASTER){
-                if(session.readyToMaster()){
-                    PetEvolutionManager.completeLesson(a);RewardInventory.completeTask(a,"academy_"+lesson.id,10);PypetAchievementManager.awardTrophy(a,"python_starter",25);
-                    Toast.makeText(a,"🎓 Lesson mastered! Next lesson unlocked.",Toast.LENGTH_SHORT).show();show(a);
-                }else result.setText("🔐 Mastery requires a successful mission and inspection.");
-                return;
-            }
-            if(s==AcademyLessonSession.Stage.LEARN)session.markLearned();
-            else if(s==AcademyLessonSession.Stage.SEE)session.markSeen();
-            else if(s==AcademyLessonSession.Stage.INSPECT)session.markInspected();
-            else if(s==AcademyLessonSession.Stage.REFLECT)session.markReflected();
-            if(session.advance()){result.setText("");refresh.run();}
-            else result.setText("🔐 Complete the current lesson requirement before advancing.");
-        });
-        hint.setOnClickListener(v->result.setText("💡 HINT\n"+hintFor(lesson.skill)+"\n\nUse the teaching card above. Build the answer yourself, run it, inspect the result, then continue."));
-        returnButton(a,r);a.setContentView(scroll);
+        Runnable refresh=()->{AcademyLessonSession.Stage s=session.stage();stage.setText("Stage: "+session.stageLabel()+"\n"+session.instruction());lessonInfo.setText("🎯 LESSON\n"+lesson.title+"\nSkill: "+lesson.skill+"\n\nHands-on mission: "+lesson.task);teaching.setText(teach(lesson.skill,lesson.title,s));prerequisite.setText(previous==null?"🟢 BEGINNER START\nNo previous Python knowledge is required. The lesson below teaches the vocabulary and idea before asking you to code.":"🔗 Prerequisite: "+previous.title+"\nWe review the needed idea here before asking you to use it.");example.setText(exampleFor(lesson.skill,s));boolean coding=s.ordinal()>=AcademyLessonSession.Stage.WRITE.ordinal();code.setVisibility(coding?android.view.View.VISIBLE:android.view.View.GONE);run.setVisibility(coding?android.view.View.VISIBLE:android.view.View.GONE);hint.setVisibility(coding?android.view.View.VISIBLE:android.view.View.GONE);switch(s){case LEARN:advance.setText("I UNDERSTAND — SHOW EXAMPLE ▶");break;case SEE:advance.setText("I SEE IT — LET ME WRITE ▶");break;case INSPECT:advance.setText("✓ I INSPECTED THE OUTPUT — CONTINUE ▶");break;case REFLECT:advance.setText("✓ REFLECTION COMPLETE — MASTER ▶");break;case MASTER:advance.setText("🏆 COMPLETE LESSON");break;default:advance.setText("NEXT "+nextStage(s)+" ▶");}advance.setEnabled(s==AcademyLessonSession.Stage.MASTER||session.canAdvance());progress.setText("🐍 "+PypetCurriculum.MODULES.size()+" modules • "+PypetCurriculum.lessonCount()+" cumulative lessons\nMastered "+PetEvolutionManager.lessons(a));};refresh.run();
+        run.setOnClickListener(v->{String source=code.getText().toString().trim();if(source.isEmpty()){result.setText("✏️ Write your own Python first. The Academy will not assume you already know Python or silently provide the answer.");return;}a.getSharedPreferences("pypet_academy_code",0).edit().putString(lesson.id,source).apply();try{PyObject py=Python.getInstance().getModule("pypet_engine");String output=py.callAttr("run_lesson",source).toString();boolean executed=output.contains("'ok': True");boolean mission=missionLooksComplete(lesson.skill,source,output);boolean passed=executed&&mission;session.recordRun(passed);if(passed){result.setText("🧪 Mission step passed.\n\nREAL PYTHON RESULT:\n"+output+"\n\n➡️ Continue to the next learning step.");refresh.run();}else{result.setText("🧪 The code ran, but the mission is not complete yet.\n\nUse the lesson explanation and hint, change one thing, then run again.\n\n"+output);refresh.run();}}catch(Exception e){result.setText("🧪 Python execution error\n"+String.valueOf(e.getMessage())+"\n\nFix the code and run it again.");}});
+        advance.setOnClickListener(v->{AcademyLessonSession.Stage s=session.stage();if(s==AcademyLessonSession.Stage.MASTER){if(session.readyToMaster()){PetEvolutionManager.completeLesson(a);RewardInventory.completeTask(a,"academy_"+lesson.id,10);PypetAchievementManager.awardTrophy(a,"python_starter",25);Toast.makeText(a,"🎓 Lesson mastered! Next lesson unlocked.",Toast.LENGTH_SHORT).show();show(a);}else result.setText("🔐 Mastery requires a successful mission and inspection.");return;}if(s==AcademyLessonSession.Stage.LEARN)session.markLearned();else if(s==AcademyLessonSession.Stage.SEE)session.markSeen();else if(s==AcademyLessonSession.Stage.INSPECT)session.markInspected();else if(s==AcademyLessonSession.Stage.REFLECT)session.markReflected();if(session.advance()){result.setText("");refresh.run();}else result.setText("🔐 Complete the current lesson requirement before advancing.");});
+        hint.setOnClickListener(v->result.setText("💡 HINT\n"+hintFor(lesson.skill)+"\n\nUse the teaching card above. Build the answer yourself, run it, inspect the result, then continue."));returnButton(a,r);a.setContentView(scroll);
     }
-
     private static String nextStage(AcademyLessonSession.Stage s){AcademyLessonSession.Stage[] v=AcademyLessonSession.Stage.values();int i=s.ordinal()+1;return i<v.length?v[i].name():"MASTER";}
-    private static String teach(String skill,String title,AcademyLessonSession.Stage stage){
-        String base;
-        if("syntax".equals(skill))base="📘 START HERE — Python syntax\nPython is written as readable statements. A function call has a name followed by parentheses. print() displays text. Text goes inside quotes. You do not need prior Python knowledge for this lesson.";
-        else if("variables".equals(skill))base="📘 Variables\nA variable is a name that refers to a value. Write name = value. Strings are text, integers are whole numbers, and Python determines the value's type at runtime.";
-        else if("arithmetic".equals(skill))base="📘 Numbers & operators\nUse +, -, *, /, //, %, and ** for arithmetic. Parentheses make the order clear. Store a calculation in a variable when you need to use it again.";
-        else if("strings".equals(skill))base="📘 Strings\nStrings hold text. Put text in quotes. f-strings let you insert values into text, for example f'Hello {name}'.";
-        else if("logic".equals(skill)||"conditionals".equals(skill))base="📘 Logic\nA Boolean is True or False. Comparisons such as age >= 1 produce Booleans. if/elif/else chooses which block runs.";
-        else if("io".equals(skill))base="📘 Input & output\nprint() shows information. input() reads text. If the player enters a number, convert it with int() or float() before doing arithmetic.";
-        else if("loops".equals(skill))base="📘 Loops\nA for loop repeats once for each item in a sequence. A while loop repeats while a condition is true. Indentation identifies the repeated block.";
-        else if("functions".equals(skill))base="📘 Functions\nA function packages reusable behavior. def starts the definition, parameters receive values, and return sends a result back to the caller.";
-        else if("collections".equals(skill))base="📘 Collections\nLists keep an ordered collection, tuples are immutable, dictionaries map keys to values, and sets keep unique values.";
-        else if("errors".equals(skill))base="📘 Exceptions\nSome operations fail at runtime. try/except lets a program handle an expected failure without crashing the whole program.";
-        else if("files".equals(skill))base="📘 Files\nopen() gives access to a file. A with block closes it reliably. Read or write deliberately and validate the data you load.";
-        else if("oop".equals(skill))base="📘 Objects\nA class describes state and behavior. An object is an instance of that class. Start with a small model before adding inheritance.";
-        else if("testing".equals(skill))base="📘 Testing\nA test states expected behavior and checks the program repeatedly. Start with a small normal case, then test edge cases.";
-        else if("debugging".equals(skill))base="📘 Debugging\nReproduce the problem, isolate it, inspect values, change one thing, rerun, and verify the fix. Debugging is a process, not guessing.";
-        else base="📘 "+title+"\nThis lesson teaches the concept before asking you to use it. Read the vocabulary, study the example, then apply the idea to the mission.";
-        if(stage==AcademyLessonSession.Stage.LEARN)return base+"\n\nYou are in the teaching step. No answer is expected yet.";
-        if(stage==AcademyLessonSession.Stage.SEE)return base+"\n\nYou are now watching a tiny working example. Predict its result before continuing.";
-        if(stage==AcademyLessonSession.Stage.WRITE)return base+"\n\nNow write the mission yourself. You can scroll back to this explanation at any time.";
-        return base;
-    }
-
-    private static String exampleFor(String skill,AcademyLessonSession.Stage stage){
-        if("syntax".equals(skill))return stage.ordinal()<AcademyLessonSession.Stage.WRITE.ordinal()?"WORKED EXAMPLE\nprint('Hello, Pip!')\n\nOutput\nHello, Pip!\n\nYour mission uses the same idea with your own greeting.":"REFERENCE\nprint('Hello, Pip!')\n\nWrite your own version below; copying is not required.";
-        if("variables".equals(skill))return "EXAMPLE\npet_name = 'Pip'\nhappiness = 80\nprint(pet_name, happiness)";
-        if("arithmetic".equals(skill))return "EXAMPLE\nfood = 3\ncoins = food * 2\nprint(coins)";
-        if("strings".equals(skill))return "EXAMPLE\nname = 'Pip'\nprint(f'Hello {name}!')";
-        if("logic".equals(skill)||"conditionals".equals(skill))return "EXAMPLE\nhunger = 20\nif hunger < 30:\n    print('Feed pet')";
-        if("io".equals(skill))return "EXAMPLE\ntown = input('Town: ')\nprint(town)";
-        if("loops".equals(skill))return "EXAMPLE\nfor food in ['apple', 'berry']:\n    print(food)";
-        if("functions".equals(skill))return "EXAMPLE\ndef feed_pet(food):\n    return 'Fed ' + food\nprint(feed_pet('apple'))";
-        if("collections".equals(skill))return "EXAMPLE\npet = {'name': 'Pip', 'level': 1}\nprint(pet['name'])";
-        return "WORKED EXAMPLE\nStart with the smallest example shown in the teaching card, then change it to meet the mission.";
-    }
-
-    private static boolean missionLooksComplete(String skill,String source,String output){
-        String s=source.toLowerCase();
-        if("syntax".equals(skill))return s.contains("print(");
-        if("variables".equals(skill))return s.contains("=")&&s.contains("print");
-        if("arithmetic".equals(skill))return s.contains("=")&&(s.contains("+")||s.contains("-")||s.contains("*")||s.contains("/")||s.contains("%")||s.contains("**"));
-        if("strings".equals(skill))return s.contains("'")||s.contains("\"");
-        if("logic".equals(skill)||"conditionals".equals(skill))return s.contains("if ");
-        if("io".equals(skill))return s.contains("input(")&&s.contains("print(");
-        if("loops".equals(skill))return s.contains("for ")||s.contains("while ");
-        if("functions".equals(skill))return s.contains("def ")&&s.contains("return");
-        if("collections".equals(skill))return s.contains("[")||s.contains("{")||s.contains("(");
-        if("errors".equals(skill))return s.contains("try:")&&s.contains("except");
-        if("files".equals(skill))return s.contains("open(");
-        if("oop".equals(skill))return s.contains("class ");
-        if("testing".equals(skill))return s.contains("assert ")||s.contains("def test_");
-        if("debugging".equals(skill))return s.contains("print")||s.contains("assert");
-        return !s.isEmpty()&&output.contains("'ok': True");
-    }
-
+    private static String teach(String skill,String title,AcademyLessonSession.Stage stage){String base;if("syntax".equals(skill))base="📘 START HERE — Python syntax\nPython is written as readable statements. A function call has a name followed by parentheses. print() displays text. Text goes inside quotes. You do not need prior Python knowledge for this lesson.";else if("variables".equals(skill))base="📘 Variables\nA variable is a name that refers to a value. Write name = value. Strings are text, integers are whole numbers, and Python determines the value's type at runtime.";else if("arithmetic".equals(skill))base="📘 Numbers & operators\nUse +, -, *, /, //, %, and ** for arithmetic. Parentheses make the order clear. Store a calculation in a variable when you need to use it again.";else if("strings".equals(skill))base="📘 Strings\nStrings hold text. Put text in quotes. f-strings let you insert values into text, for example f'Hello {name}'.";else if("logic".equals(skill)||"conditionals".equals(skill))base="📘 Logic\nA Boolean is True or False. Comparisons such as age >= 1 produce Booleans. if/elif/else chooses which block runs.";else if("io".equals(skill))base="📘 Input & output\nprint() shows information. input() reads text. If the player enters a number, convert it with int() or float() before doing arithmetic.";else if("loops".equals(skill))base="📘 Loops\nA for loop repeats once for each item in a sequence. A while loop repeats while a condition is true. Indentation identifies the repeated block.";else if("functions".equals(skill))base="📘 Functions\nA function packages reusable behavior. def starts the definition, parameters receive values, and return sends a result back to the caller.";else if("collections".equals(skill))base="📘 Collections\nLists keep an ordered collection, tuples are immutable, dictionaries map keys to values, and sets keep unique values.";else if("errors".equals(skill))base="📘 Exceptions\nSome operations fail at runtime. try/except lets a program handle an expected failure without crashing the whole program.";else if("files".equals(skill))base="📘 Files\nopen() gives access to a file. A with block closes it reliably. Read or write deliberately and validate the data you load.";else if("oop".equals(skill))base="📘 Objects\nA class describes state and behavior. An object is an instance of that class. Start with a small model before adding inheritance.";else if("testing".equals(skill))base="📘 Testing\nA test states expected behavior and checks the program repeatedly. Start with a small normal case, then test edge cases.";else if("debugging".equals(skill))base="📘 Debugging\nReproduce the problem, isolate it, inspect values, change one thing, rerun, and verify the fix. Debugging is a process, not guessing.";else base="📘 "+title+"\nThis lesson teaches the concept before asking you to use it. Read the vocabulary, study the example, then apply the idea to the mission.";if(stage==AcademyLessonSession.Stage.LEARN)return base+"\n\nYou are in the teaching step. No answer is expected yet.";if(stage==AcademyLessonSession.Stage.SEE)return base+"\n\nYou are now watching a tiny working example. Predict its result before continuing.";if(stage==AcademyLessonSession.Stage.WRITE)return base+"\n\nNow write the mission yourself. You can scroll back to this explanation at any time.";return base;}
+    private static String exampleFor(String skill,AcademyLessonSession.Stage stage){if("syntax".equals(skill))return stage.ordinal()<AcademyLessonSession.Stage.WRITE.ordinal()?"WORKED EXAMPLE\nprint('Hello, Pip!')\n\nOutput\nHello, Pip!\n\nYour mission uses the same idea with your own greeting.":"REFERENCE\nprint('Hello, Pip!')\n\nWrite your own version below; copying is not required.";if("variables".equals(skill))return "EXAMPLE\npet_name = 'Pip'\nhappiness = 80\nprint(pet_name, happiness)";if("arithmetic".equals(skill))return "EXAMPLE\nfood = 3\ncoins = food * 2\nprint(coins)";if("strings".equals(skill))return "EXAMPLE\nname = 'Pip'\nprint(f'Hello {name}!')";if("logic".equals(skill)||"conditionals".equals(skill))return "EXAMPLE\nhunger = 20\nif hunger < 30:\n    print('Feed pet')";if("io".equals(skill))return "EXAMPLE\ntown = input('Town: ')\nprint(town)";if("loops".equals(skill))return "EXAMPLE\nfor food in ['apple', 'berry']:\n    print(food)";if("functions".equals(skill))return "EXAMPLE\ndef feed_pet(food):\n    return 'Fed ' + food\nprint(feed_pet('apple'))";if("collections".equals(skill))return "EXAMPLE\npet = {'name': 'Pip', 'level': 1}\nprint(pet['name'])";return "WORKED EXAMPLE\nStart with the smallest example shown in the teaching card, then change it to meet the mission.";}
+    private static boolean missionLooksComplete(String skill,String source,String output){String s=source.toLowerCase();if("syntax".equals(skill))return s.contains("print(");if("variables".equals(skill))return s.contains("=")&&s.contains("print");if("arithmetic".equals(skill))return s.contains("=")&&(s.contains("+")||s.contains("-")||s.contains("*")||s.contains("/")||s.contains("%")||s.contains("**"));if("strings".equals(skill))return s.contains("'")||s.contains("\"");if("logic".equals(skill)||"conditionals".equals(skill))return s.contains("if ");if("io".equals(skill))return s.contains("input(")&&s.contains("print(");if("loops".equals(skill))return s.contains("for ")||s.contains("while ");if("functions".equals(skill))return s.contains("def ")&&s.contains("return");if("collections".equals(skill))return s.contains("[")||s.contains("{")||s.contains("(");if("errors".equals(skill))return s.contains("try:")&&s.contains("except");if("files".equals(skill))return s.contains("open(");if("oop".equals(skill))return s.contains("class ");if("testing".equals(skill))return s.contains("assert ")||s.contains("def test_");if("debugging".equals(skill))return s.contains("print")||s.contains("assert");return !s.isEmpty()&&output.contains("'ok': True");}
     private static String hintFor(String skill){if("syntax".equals(skill))return "Start with print('...'). The text inside quotes is what the program displays.";if("variables".equals(skill))return "Use name = value, then print the variable to inspect it.";if("loops".equals(skill))return "Start with for item in items: and indent the repeated action.";if("conditionals".equals(skill)||"logic".equals(skill))return "Write the Boolean condition after if and indent the action.";if("functions".equals(skill))return "Use def function_name(parameter): and return the value the caller needs.";return "Break the mission into the smallest working step, inspect values with print(), then change one thing at a time.";}
     private static void returnButton(Activity a,LinearLayout r){Button b=new Button(a);b.setText("🌎 Return to PyPet World");b.setAllCaps(false);b.setOnClickListener(v->LivingWorldView.show(a));r.addView(b);}
 }
