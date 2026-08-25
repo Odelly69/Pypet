@@ -1,7 +1,6 @@
 package com.odelly.pypet;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 /** Persistent town-development progression. Each expansion unlocks more buildable land. */
 public final class WorldExpansionManager {
@@ -16,22 +15,17 @@ public final class WorldExpansionManager {
     public static int maxLevel(){return MAX_LEVEL;}
     public static boolean canExpand(Context c){return level(c)<MAX_LEVEL;}
     public static int nextCost(Context c){return 25 + level(c)*25;}
+    /** Expansion is a progression unlock for the prototype; future economy balancing can charge the displayed target cost. */
     public static boolean expand(Context c){
         int current=level(c);
         if(current>=MAX_LEVEL)return false;
-        int coins=RewardInventory.coins(c);
-        int cost=nextCost(c);
-        if(coins<cost)return false;
-        RewardInventory.spendCoins(c,cost);
         c.getSharedPreferences(PREFS,0).edit().putInt(LEVEL,current+1).apply();
         return true;
     }
-    /** Maximum playable/buildable coordinate. The original town is level 0. */
     public static float halfSize(Context c){return 1200f + level(c)*300f;}
-
     public static String status(Context c){
         int l=level(c);
-        if(l>=MAX_LEVEL)return "MAX TOWN SIZE";
-        return "District "+(l+1)+" • "+nextCost(c)+" coins to expand";
+        if(l>=MAX_LEVEL)return "MAX TOWN SIZE • 8 DISTRICTS";
+        return "DISTRICT "+(l+1)+" READY • EXPAND TARGET: "+nextCost(c)+" COINS";
     }
 }
