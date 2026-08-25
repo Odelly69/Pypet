@@ -75,11 +75,12 @@ jobs:
           grep -Fq 'Complete daily care routine' "$home"
           grep -Fq 'tap a building to do its activity' "$world"
           grep -Fq 'workshop(c,-850,-940,-420,-620,3)' "$world"
-          grep -Fq 'park(c,-1080,250,-220,700,4)' "$world"
-          ! grep -Fq 'park(c,-1080,-560,-220,-50,4)' "$world"
-          grep -Fq 'PARK_T=250f' "$placement"
-          grep -Fq 'PARK_B=700f' "$placement"
+          grep -Fq 'park(c,-1080,720,-220,1090,4)' "$world"
+          grep -Fq 'house(c,420,760,850,1060,"HOME",0,Color.rgb(164,83,63))' "$world"
+          grep -Fq 'PARK_T=720f' "$placement"
+          grep -Fq 'PARK_B=1090f' "$placement"
           grep -Fq 'ROAD_BLOCK=205f' "$placement"
+          grep -Fq 'inRect(x,y,250,720,910,1090,pad)' "$placement"
           ! grep -Fq 'LEARN BY DOING' "$activity"
       - name: Verify beginner-first Academy
         run: |
