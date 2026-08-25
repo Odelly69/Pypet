@@ -33,9 +33,10 @@ public final class PetWorldAI {
 
         if(last==0){
             x=clamp(x,minX,maxX); y=clamp(y,minY,maxY);
-            if(!walkable(x,y)){x=260;y=420;}
+            if(!walkable(x,y)){x=300;y=720;}
             last=now;
         }
+        if(!walkable(x,y)){float[] spawn=randomWalkable(minX,maxX,minY,maxY);x=spawn[0];y=spawn[1];}
 
         if(Float.isNaN(tx)||now>=next||Math.hypot(tx-x,ty-y)<12){
             float[] target=randomWalkable(minX,maxX,minY,maxY);
@@ -53,14 +54,9 @@ public final class PetWorldAI {
             float nx=x+(float)Math.cos(h)*speed*dt;
             float ny=y+(float)Math.sin(h)*speed*dt;
             if(walkable(nx,ny)){x=nx;y=ny;}
-            else{
-                float[] detour=randomWalkable(minX,maxX,minY,maxY);
-                tx=detour[0];ty=detour[1];next=now+1200L;
-            }
+            else{float[] detour=randomWalkable(minX,maxX,minY,maxY);tx=detour[0];ty=detour[1];next=now+1200L;}
             phase+=speed*dt*0.18f;
-        }else{
-            phase+=dt*0.7f;
-        }
+        }else{phase+=dt*0.7f;}
         x=clamp(x,minX,maxX); y=clamp(y,minY,maxY);
         p.edit().putFloat(X,x).putFloat(Y,y).putFloat(H,h).putFloat(TARGET_X,tx).putFloat(TARGET_Y,ty)
                 .putLong(NEXT,next).putLong(LAST,now).putFloat(PHASE,phase).apply();
@@ -70,30 +66,27 @@ public final class PetWorldAI {
     /** Safe destinations include lawns, park space, and the sidewalks beside roads. */
     private static float[] randomWalkable(float minX,float maxX,float minY,float maxY){
         for(int i=0;i<80;i++){
-            float x=minX+RNG.nextFloat()*(maxX-minX);
-            float y=minY+RNG.nextFloat()*(maxY-minY);
+            float x=minX+RNG.nextFloat()*(maxX-minX),y=minY+RNG.nextFloat()*(maxY-minY);
             if(walkable(x,y))return new float[]{x,y};
         }
-        return new float[]{300,420};
+        return new float[]{300,720};
     }
 
     private static boolean walkable(float x,float y){
         if(x<-1120||x>1120||y<-1120||y>1120)return false;
-        // Roads are crossings, not the pet's normal walking surface.
         if(Math.abs(x)<155||Math.abs(y)<155)return false;
-        // Keep the pet out of the building footprints and their immediate front steps.
         if(inRect(x,y,-875,-965,-395,-595)||inRect(x,y,395,-965,875,-595)
                 ||inRect(x,y,395,260,875,630)||inRect(x,y,-875,260,-395,630)
                 ||inRect(x,y,395,730,875,1080))return false;
         return true;
     }
-
     private static boolean inRect(float x,float y,float l,float t,float r,float b){return x>=l-25&&x<=r+25&&y>=t-25&&y<=b+25;}
     private static float clamp(float v,float lo,float hi){return Math.max(lo,Math.min(hi,v));}
     private static float angleDelta(float from,float to){float d=to-from;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return d;}
     private static float turnToward(float from,float to,float amount){float d=angleDelta(from,to);return from+Math.max(-amount,Math.min(amount,d));}
 
     public static void reset(Context c,float x,float y){
+        if(!walkable(x,y)){x=300;y=720;}
         c.getSharedPreferences(PREF,Context.MODE_PRIVATE).edit().putFloat(X,x).putFloat(Y,y)
                 .remove(TARGET_X).remove(TARGET_Y).putLong(LAST,System.currentTimeMillis()).putFloat(PHASE,0).apply();
     }
