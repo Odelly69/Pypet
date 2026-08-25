@@ -25,6 +25,15 @@ public final class RewardInventory {
         addCoinsInternal(context, amount);
     }
 
+    /** Spend currency atomically when a player buys an eligible in-game item/upgrade. */
+    public static boolean spendCoins(Context context, int amount) {
+        if (amount <= 0) return false;
+        SharedPreferences p = prefs(context);
+        int current = coins(context);
+        if (current < amount) return false;
+        return p.edit().putInt(COINS, current - amount).commit();
+    }
+
     /** Award a task once per task ID. Returns false if it was already completed. */
     public static boolean completeTask(Context context, String taskId, int rewardCoins) {
         if (taskId == null || taskId.trim().isEmpty() || rewardCoins <= 0) return false;
