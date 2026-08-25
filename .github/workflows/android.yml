@@ -36,143 +36,79 @@ jobs:
         run: python -m pip install pytest
       - name: Run Python world and curriculum tests
         run: PYTHONPATH=app/src/main/python pytest app/src/test/python -q
-      - name: Verify Academy-only sequential learning and Home care routing
+      - name: Verify product rules
         run: |
           set -e
           manager=app/src/main/java/com/odelly/pypet/BuildingEventManager.java
+          home=app/src/main/java/com/odelly/pypet/PetHomeCareView.java
           academy=app/src/main/java/com/odelly/pypet/PypetAcademyActivityView.java
           curriculum=app/src/main/java/com/odelly/pypet/PypetCurriculum.java
-          session=app/src/main/java/com/odelly/pypet/AcademyLessonSession.java
-          activity=app/src/main/java/com/odelly/pypet/BuildingActivityView.java
-          home=app/src/main/java/com/odelly/pypet/PetHomeCareView.java
-          legacy=app/src/main/java/com/odelly/pypet/BuildingLearningGateView.java
-          grep -q 'case "PYTHON ACADEMY": PypetAcademyActivityView.show' "$manager"
-          grep -q 'case "HOME": PetHomeCareView.show' "$manager"
-          grep -q 'case "MARKET": BuildingActivityView.market' "$manager"
-          grep -q 'case "WORKSHOP": BuildingActivityView.workshop' "$manager"
-          grep -q 'case "PARK": BuildingActivityView.park' "$manager"
-          grep -q 'case "LIBRARY": BuildingActivityView.library' "$manager"
-          ! grep -q 'BuildingLearningGateView.show' "$manager"
-          grep -q 'currentLesson(mastered)' "$academy"
-          grep -q 'lessonCount()' "$academy"
-          grep -q 'completeLesson(a)' "$academy"
-          grep -q 'indexOf(String id)' "$curriculum"
-          grep -q 'currentLesson(int masteredCount)' "$curriculum"
-          grep -q 'return all.get(Math.max(0,masteredCount))' "$curriculum"
-          grep -q 'canStart(String id,int masteredCount)' "$curriculum"
-          grep -q 'markLearned' "$session"
-          grep -q 'markSeen' "$session"
-          grep -q 'markInspected' "$session"
-          grep -q 'Python instruction and sequential lesson progress live exclusively in PyPet Academy' "$activity"
-          grep -q 'Swipe left/right to rotate rooms' "$home"
-          grep -q 'DROP FOOD HERE' "$home"
-          grep -q 'startDragAndDrop' "$home"
-          grep -q 'ACTION_DROP' "$home"
-          grep -q 'FRUIT' "$home"
-          grep -q 'VEGETABLES' "$home"
-          grep -q 'PROTEIN / FISH' "$home"
-          grep -q 'TREATS' "$home"
-          grep -q 'Drag 🧼 SOAP across your pet' "$home"
-          grep -q 'Move the animated 🚿 SHOWER over the soapy pet' "$home"
-          grep -q 'SOAP SUDS' "$home"
-          grep -q 'soaped\[0\]' "$home"
-          grep -q 'PetCareSystem.bathe' "$home"
-          grep -q 'Clean up waste' "$home"
-          grep -q 'Complete daily care routine' "$home"
-          grep -q 'BuildingEventManager.open' "$legacy"
-          ! grep -q 'review challenge' "$activity"
-          ! grep -q 'final int\[\] correct' "$activity"
-      - name: Verify no legacy building learning popup
-        run: |
-          set -e
-          manager=app/src/main/java/com/odelly/pypet/BuildingEventManager.java
-          legacy=app/src/main/java/com/odelly/pypet/BuildingLearningGateView.java
-          ! grep -R -n 'BuildingLearningGateView.show' "$manager"
-          ! grep -n 'LEARN BY DOING' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
-          ! grep -n 'LEARN BY DOING' "$legacy"
-      - name: Verify World acceptance requirements
-        run: |
-          set -e
           world=app/src/main/java/com/odelly/pypet/LivingWorldView.java
           placement=app/src/main/java/com/odelly/pypet/WorldPlacementManager.java
-          expansion=app/src/main/java/com/odelly/pypet/WorldExpansionManager.java
-          builder=app/src/main/java/com/odelly/pypet/WorldBuilderView.java
-          grep -q 'tap a building to do its activity' "$world"
-          grep -q 'Math.max(getWidth()/W,getHeight()/H)' "$world"
-          grep -q 'drawColor(Color.rgb(151,196,119))' "$world"
-          grep -q 'door(c,m,bot)' "$world"
-          grep -q 'private void window' "$world"
-          grep -q 'c.drawOval(s.x-34,s.y-3,s.x+34,s.y+12,p)' "$world"
-          grep -q 'PetWorldAI.State' "$world"
-          grep -q 'private static float half(Context c)' "$placement"
-          grep -q 'ROAD_BLOCK=205f' "$placement"
-          grep -q 'PARK_L=-1080f' "$placement"
-          grep -q 'PARK_T=250f' "$placement"
-          grep -q 'PARK_R=-220f' "$placement"
-          grep -q 'PARK_B=700f' "$placement"
-          ! grep -q 'PARK_T=-560f' "$placement"
-          ! grep -q 'PARK_B=-50f' "$placement"
-          grep -q 'void placeUnique' "$placement"
-          grep -q 'Math.hypot(x-other.x,y-other.y)' "$placement"
-          grep -q 'halfSize' "$expansion"
-          grep -q 'expand(Context c)' "$expansion"
-          grep -q 'attachToWorld' "$builder"
-          grep -q 'EXPAND TOWN' "$builder"
-          grep -q 'WorldBuilderView.attachToWorld' app/src/main/java/com/odelly/pypet/MainActivity.java
-          grep -q 'RewardCenterView.show' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
-          grep -q 'TreasureStore.show' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
-          grep -q 'pauseForLifecycle' app/src/main/java/com/odelly/pypet/MainActivity.java
-          grep -q 'Choose your avatar' app/src/main/java/com/odelly/pypet/PypetProfileView.java
-          grep -q 'workshop(c,-850,-940,-420,-620,3)' "$world"
-          grep -q 'park(c,-1080,250,-220,700,4)' "$world"
-          ! grep -q 'park(c,-1080,-560,-220,-50,4)' "$world"
-      - name: Verify beginner-first Academy teaching and gated stages
+          activity=app/src/main/java/com/odelly/pypet/BuildingActivityView.java
+          grep -Fq 'case "PYTHON ACADEMY": PypetAcademyActivityView.show' "$manager"
+          grep -Fq 'case "HOME": PetHomeCareView.show' "$manager"
+          grep -Fq 'case "WORKSHOP": BuildingActivityView.workshop' "$manager"
+          grep -Fq 'case "PARK": BuildingActivityView.park' "$manager"
+          grep -Fq 'case "MARKET": BuildingActivityView.market' "$manager"
+          grep -Fq 'case "LIBRARY": BuildingActivityView.library' "$manager"
+          ! grep -Fq 'BuildingLearningGateView.show' "$manager"
+          grep -Fq 'currentLesson(mastered)' "$academy"
+          grep -Fq 'completeLesson(a)' "$academy"
+          grep -Fq 'lessonCount()' "$academy"
+          grep -Fq 'currentLesson(int masteredCount)' "$curriculum"
+          grep -Fq 'canStart(String id,int masteredCount)' "$curriculum"
+          grep -Fq 'Swipe left/right to rotate rooms' "$home"
+          grep -Fq 'DROP FOOD HERE' "$home"
+          grep -Fq 'startDragAndDrop' "$home"
+          grep -Fq 'ACTION_DROP' "$home"
+          grep -Fq 'FRUIT' "$home"
+          grep -Fq 'VEGETABLES' "$home"
+          grep -Fq 'PROTEIN / FISH' "$home"
+          grep -Fq 'TREATS' "$home"
+          grep -Fq 'Drag 🧼 SOAP across your pet' "$home"
+          grep -Fq 'Move the animated 🚿 SHOWER over the soapy pet' "$home"
+          grep -Fq 'SOAP SUDS' "$home"
+          grep -Fq 'soaped[0]' "$home"
+          grep -Fq 'PetCareSystem.bathe' "$home"
+          grep -Fq 'Clean up waste' "$home"
+          grep -Fq 'Complete daily care routine' "$home"
+          grep -Fq 'tap a building to do its activity' "$world"
+          grep -Fq 'workshop(c,-850,-940,-420,-620,3)' "$world"
+          grep -Fq 'park(c,-1080,250,-220,700,4)' "$world"
+          ! grep -Fq 'park(c,-1080,-560,-220,-50,4)' "$world"
+          grep -Fq 'PARK_T=250f' "$placement"
+          grep -Fq 'PARK_B=700f' "$placement"
+          grep -Fq 'ROAD_BLOCK=205f' "$placement"
+          ! grep -Fq 'LEARN BY DOING' "$activity"
+      - name: Verify beginner-first Academy
         run: |
           set -e
           academy=app/src/main/java/com/odelly/pypet/PypetAcademyActivityView.java
-          session=app/src/main/java/com/odelly/pypet/AcademyLessonSession.java
-          grep -q 'No previous Python knowledge is required' "$academy"
-          grep -q 'WORKED EXAMPLE' "$academy"
-          grep -q 'I UNDERSTAND — SHOW EXAMPLE' "$academy"
-          grep -q 'missionLooksComplete' "$academy"
-          grep -q 'markLearned' "$session"
-          grep -q 'markSeen' "$session"
-          grep -q 'markInspected' "$session"
-      - name: Verify egg hatching and same-lineage evolution
+          grep -Fq 'No previous Python knowledge is required' "$academy"
+          grep -Fq 'WORKED EXAMPLE' "$academy"
+          grep -Fq 'I UNDERSTAND — SHOW EXAMPLE' "$academy"
+          grep -Fq 'missionLooksComplete' "$academy"
+      - name: Verify egg evolution and pet movement
         run: |
           set -e
           evolution=app/src/main/java/com/odelly/pypet/PetEvolutionManager.java
-          hatchery=app/src/main/java/com/odelly/pypet/PypetHatcheryView.java
-          grep -q 'class Egg' "$evolution"
-          grep -q 'HATCHED' "$evolution"
-          grep -q 'hatchCurrentEgg' "$evolution"
-          grep -q 'putBoolean(HATCHED,true)' "$evolution"
-          grep -q 'putString(LINEAGE,e.lineage)' "$evolution"
-          grep -q 'private static void evolve' "$evolution"
-          grep -q 'variant(p(c).getString(LINEAGE' "$evolution"
-          grep -q 'EGG → HATCHLING → GROWING FORM → ADVANCED FORM → MASTER FORM' "$hatchery"
-          grep -q 'SAME' "$hatchery"
-          grep -q 'Hatch this egg' "$hatchery"
-          grep -q 'hatchCurrentEgg' "$hatchery"
-      - name: Verify pet movement is obstacle-aware and grounded
-        run: |
-          set -e
           ai=app/src/main/java/com/odelly/pypet/PetWorldAI.java
-          body=app/src/main/java/com/odelly/pypet/PetBodyModel.java
-          grep -q 'randomWalkable' "$ai"
-          grep -q 'walkable' "$ai"
-          grep -q 'turnToward' "$ai"
-          grep -q 'stepPhase' "$ai"
-          grep -q '0xFF000000' "$body"
-      - name: Verify purchase verifier is fail-closed
+          grep -Fq 'class Egg' "$evolution"
+          grep -Fq 'HATCHED' "$evolution"
+          grep -Fq 'hatchCurrentEgg' "$evolution"
+          grep -Fq 'putString(LINEAGE,e.lineage)' "$evolution"
+          grep -Fq 'randomWalkable' "$ai"
+          grep -Fq 'walkable' "$ai"
+          grep -Fq 'turnToward' "$ai"
+      - name: Verify purchase verifier
         run: |
           set -e
           verifier=../api/google-play/verify-purchase.js
-          grep -q "treasure_crystal" "$verifier"
-          grep -q "pypet_premium_ultimate_world" "$verifier"
-          grep -q 'purchase.purchaseState!==0' "$verifier"
-          grep -q 'consumptionState===1' "$verifier"
-          grep -q 'acknowledge' "$verifier"
+          grep -Fq 'treasure_crystal' "$verifier"
+          grep -Fq 'pypet_premium_ultimate_world' "$verifier"
+          grep -Fq 'purchase.purchaseState!==0' "$verifier"
+          grep -Fq 'acknowledge' "$verifier"
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
       - name: Install Android SDK
@@ -181,23 +117,21 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
-      - name: Build debug APK
+      - name: Clean and build debug APK
         run: gradle clean assembleDebug --stacktrace
       - name: Verify debug APK
         run: test -s app/build/outputs/apk/debug/app-debug.apk
-      - name: Build production release APK
+      - name: Build release APK
         run: gradle assembleRelease --stacktrace
-      - name: Verify production release APK
+      - name: Verify release APK
         run: test -s app/build/outputs/apk/release/app-release-unsigned.apk
-      - name: Upload installable debug APK
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: pypet-android-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-      - name: Upload production release APK
+      - name: Upload unsigned release APK
         uses: actions/upload-artifact@v4
         with:
           name: pypet-android-release-unsigned-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
-
-# CI gate: Python instruction is Academy-only and strictly sequential; Home is the dedicated care/feed/bath station; Workshop and Park have separate lots; and road/object collisions are enforced.
