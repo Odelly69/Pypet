@@ -36,17 +36,18 @@ jobs:
         run: python -m pip install pytest
       - name: Run Python world and curriculum tests
         run: PYTHONPATH=app/src/main/python pytest app/src/test/python -q
-      - name: Verify real building activity routing
+      - name: Verify real building activity routing and teaching gate
         run: |
           set -e
           manager=app/src/main/java/com/odelly/pypet/BuildingEventManager.java
+          gate=app/src/main/java/com/odelly/pypet/BuildingLearningGateView.java
           activity=app/src/main/java/com/odelly/pypet/BuildingActivityView.java
-          grep -q 'case "HOME": BuildingActivityView.home' "$manager"
           grep -q 'case "PYTHON ACADEMY": PypetAcademyActivityView.show' "$manager"
-          grep -q 'case "MARKET": BuildingActivityView.market' "$manager"
-          grep -q 'case "WORKSHOP": BuildingActivityView.workshop' "$manager"
-          grep -q 'case "PARK": BuildingActivityView.park' "$manager"
-          grep -q 'case "LIBRARY": BuildingActivityView.library' "$manager"
+          grep -q 'BuildingLearningGateView.show' "$manager"
+          grep -q 'public static void show' "$gate"
+          grep -q 'RUN REAL PYTHON' "$gate"
+          grep -q 'lessonFor' "$gate"
+          grep -q 'missionComplete' "$gate"
           grep -q 'public static void home' "$activity"
           grep -q 'public static void market' "$activity"
           grep -q 'public static void workshop' "$activity"
@@ -54,7 +55,7 @@ jobs:
           grep -q 'public static void library' "$activity"
       - name: Verify no legacy building description popup
         run: |
-          ! grep -R -n 'new AlertDialog' app/src/main/java/com/odelly/pypet/BuildingActivityView.java app/src/main/java/com/odelly/pypet/BuildingEventManager.java
+          ! grep -R -n 'new AlertDialog' app/src/main/java/com/odelly/pypet/BuildingActivityView.java app/src/main/java/com/odelly/pypet/BuildingEventManager.java app/src/main/java/com/odelly/pypet/BuildingLearningGateView.java
       - name: Verify World acceptance requirements
         run: |
           set -e
@@ -67,8 +68,8 @@ jobs:
           grep -q 'private void window' "$world"
           grep -q 'groundY' "$world"
           grep -q 'PetWorldAI.State' "$world"
-          grep -q 'WORLD_HALF_W=1200f' "$placement"
-          grep -q 'WORLD_HALF_H=1200f' "$placement"
+          grep -q 'HALF=1200f' "$placement"
+          grep -q 'ROAD_BLOCK=205f' "$placement"
           grep -q 'void placeUnique' "$placement"
           grep -q 'RewardCenterView.show' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
           grep -q 'TreasureStore.show' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
@@ -148,4 +149,4 @@ jobs:
           name: pypet-android-release-unsigned-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
-# CI gate: every Android source/workflow change must produce verified APK artifacts and prove the World, beginner-first Academy, real building activities, grounded pet movement, exact displayed-egg hatching, same-lineage evolution, rewards/purchase safeguards, and profile/audio requirements are present.
+# CI gate: every Android source/workflow change must produce verified APK artifacts and prove the World, taught building activities, beginner-first Academy, grounded pet movement, evolution, rewards/purchase safeguards, and profile/audio requirements are present.
