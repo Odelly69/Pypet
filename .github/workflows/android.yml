@@ -61,6 +61,8 @@ jobs:
           set -e
           world=app/src/main/java/com/odelly/pypet/LivingWorldView.java
           placement=app/src/main/java/com/odelly/pypet/WorldPlacementManager.java
+          expansion=app/src/main/java/com/odelly/pypet/WorldExpansionManager.java
+          builder=app/src/main/java/com/odelly/pypet/WorldBuilderView.java
           grep -q 'tap a building to DO the activity' "$world"
           grep -q 'Math.max(getWidth()/W,getHeight()/H)' "$world"
           grep -q 'drawColor(Color.rgb(151,196,119))' "$world"
@@ -68,9 +70,14 @@ jobs:
           grep -q 'private void window' "$world"
           grep -q 'groundY' "$world"
           grep -q 'PetWorldAI.State' "$world"
-          grep -q 'HALF=1200f' "$placement"
+          grep -q 'private static float half(Context c)' "$placement"
           grep -q 'ROAD_BLOCK=205f' "$placement"
           grep -q 'void placeUnique' "$placement"
+          grep -q 'halfSize' "$expansion"
+          grep -q 'expand(Context c)' "$expansion"
+          grep -q 'attachToWorld' "$builder"
+          grep -q 'EXPAND TOWN' "$builder"
+          grep -q 'WorldBuilderView.attachToWorld' app/src/main/java/com/odelly/pypet/MainActivity.java
           grep -q 'RewardCenterView.show' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
           grep -q 'TreasureStore.show' app/src/main/java/com/odelly/pypet/BuildingActivityView.java
           grep -q 'pauseForLifecycle' app/src/main/java/com/odelly/pypet/MainActivity.java
@@ -149,4 +156,4 @@ jobs:
           name: pypet-android-release-unsigned-apk
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
 
-# CI gate: every Android source/workflow change must produce verified APK artifacts and prove the World, taught building activities, beginner-first Academy, grounded pet movement, evolution, rewards/purchase safeguards, and profile/audio requirements are present.
+# CI gate: every Android source/workflow change must produce verified APK artifacts and prove the World, buildable/expandable town, taught building activities, beginner-first Academy, grounded pet movement, evolution, rewards/purchase safeguards, and profile/audio requirements are present.
