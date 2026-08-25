@@ -1,9 +1,4 @@
-"""Pypet Academy: hands-on novice-to-master Python curriculum.
-
-Every skill is introduced through a mission, practiced by running code, and
-used to change the game world. The manifest covers Python, the standard
-library, and major ecosystem tools such as tkinter and pygame.
-"""
+"""PyPet Academy: hands-on novice-to-master Python curriculum."""
 from dataclasses import dataclass, asdict
 from typing import Any
 
@@ -49,6 +44,10 @@ _add("Apprentice", "A", [
 ])
 _add("Intermediate", "I", [
     ("Classes", "objects, classes, methods", "Create a custom world object.", "builtins"),
+    ("Inheritance", "base classes and overriding", "Create specialized pet species from a shared class.", "builtins"),
+    ("Composition", "objects containing objects", "Build a town from reusable world components.", "builtins"),
+    ("Properties", "property getters and setters", "Protect and validate pet state.", "builtins"),
+    ("Python Data Model", "dunder methods and protocols", "Teach a world object to behave naturally with Python operators.", "builtins"),
     ("Dataclasses", "structured state", "Model a pet and inventory.", "dataclasses"),
     ("Iterators", "iter and next", "Build a world resource stream.", "itertools"),
     ("Generators", "yield and lazy computation", "Generate an endless supply trail.", "builtins"),
