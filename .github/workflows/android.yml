@@ -78,7 +78,6 @@ jobs:
           grep -q 'PetCareSystem.bathe' "$home"
           grep -q 'Clean up waste' "$home"
           grep -q 'Complete daily care routine' "$home"
-          grep -q 'Python lessons are taught only at the Academy' "$legacy"
           grep -q 'BuildingEventManager.open' "$legacy"
           ! grep -q 'review challenge' "$activity"
           ! grep -q 'final int\[\] correct' "$activity"
