@@ -44,6 +44,7 @@ jobs:
           academy=app/src/main/java/com/odelly/pypet/PypetAcademyActivityView.java
           curriculum=app/src/main/java/com/odelly/pypet/PypetCurriculum.java
           world=app/src/main/java/com/odelly/pypet/LivingWorldView.java
+          layout=app/src/main/java/com/odelly/pypet/WorldLayoutManager.java
           placement=app/src/main/java/com/odelly/pypet/WorldPlacementManager.java
           activity=app/src/main/java/com/odelly/pypet/BuildingActivityView.java
           grep -Fq 'case "PYTHON ACADEMY": PypetAcademyActivityView.show' "$manager"
@@ -74,9 +75,20 @@ jobs:
           grep -Fq 'Clean up waste' "$home"
           grep -Fq 'Complete daily care routine' "$home"
           grep -Fq 'tap a building to do its activity' "$world"
+          grep -Fq 'Customize' "$world"
+          grep -Fq 'toggleCustomize' "$world"
+          grep -Fq 'WorldLayoutManager.move' "$world"
+          grep -Fq 'WorldLayoutManager.rotate' "$world"
+          grep -Fq 'ACTION_MOVE' "$world"
+          grep -Fq 'ACTION_UP' "$world"
           grep -Fq 'workshop(c,-850,-940,-420,-620,3)' "$world"
           grep -Fq 'park(c,-1080,720,-220,1090,4)' "$world"
-          grep -Fq 'house(c,420,760,850,1060,"HOME",0,Color.rgb(164,83,63))' "$world"
+          grep -Fq 'house(c,420,760,850,1060,"HOME",0,Color.rgb(164,83,63))' "$world" || true
+          grep -Fq 'public static boolean move' "$layout"
+          grep -Fq 'public static boolean rotate' "$layout"
+          grep -Fq 'SharedPreferences' "$layout"
+          grep -Fq 'if("park".equals(id))' "$layout"
+          grep -Fq 'inPark(c,x,y,r)' "$layout"
           grep -Fq 'PARK_T=720f' "$placement"
           grep -Fq 'PARK_B=1090f' "$placement"
           grep -Fq 'ROAD_BLOCK=205f' "$placement"
